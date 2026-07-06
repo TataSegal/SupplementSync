@@ -294,21 +294,21 @@ function renderTodayChecklist() {
 
 function updateProgressRing(taken, total) {
     const ratioText = document.getElementById('progress-ratio-text');
-    const centerText = document.getElementById('progress-center-text');
+    const percentText = document.getElementById('progress-percent-text');
     const circle = document.getElementById('progress-ring-circle');
     
     const percentage = total > 0 ? Math.round((taken / total) * 100) : 0;
     
     if (ratioText) {
-        ratioText.textContent = `${taken} of ${total} completed today`;
+        ratioText.textContent = `${taken} of ${total} taken`;
     }
-    if (centerText) {
-        centerText.textContent = `${percentage}%`;
+    if (percentText) {
+        percentText.textContent = `${percentage}%`;
     }
     
-    // SVG DashOffset math (r = 15, circumference = 94.25)
+    // SVG DashOffset math (r = 18, circumference = 113.1)
     if (circle) {
-        const circumference = 94.25;
+        const circumference = 113.1;
         const offset = circumference - (percentage / 100) * circumference;
         circle.style.strokeDashoffset = offset;
     }

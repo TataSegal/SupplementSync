@@ -12,7 +12,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
     <div class="app-container">
@@ -80,23 +80,25 @@
                 <div class="header-info" style="flex: 1; min-width: 0;">
                     <p class="date-today" id="current-date">Sunday, July 5</p>
                     <div class="welcome-row">
-                        <div class="welcome-text-group">
-                            <h2 class="welcome-text">Your Wellness Journey</h2>
-                            <p class="header-progress-sub" id="progress-ratio-text">0 of 0 completed today</p>
-                        </div>
-                        <!-- Tiny circular progress ring next to title -->
-                        <div class="header-progress-ring-container">
-                            <svg class="progress-ring" width="36" height="36">
+                        <h2 class="welcome-text">Your Wellness Journey</h2>
+                        <div class="header-progress-ring-wrapper">
+                            <svg class="progress-ring" width="44" height="44">
                                 <defs>
                                     <linearGradient id="progress-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                                         <stop offset="0%" stop-color="var(--accent-teal)"/>
                                         <stop offset="100%" stop-color="var(--accent-blue)"/>
                                     </linearGradient>
                                 </defs>
-                                <circle class="progress-ring-bg" stroke-width="3" fill="transparent" r="15" cx="18" cy="18" />
-                                <circle class="progress-ring-fill" id="progress-ring-circle" stroke="url(#progress-grad)" stroke-width="3" stroke-dasharray="94.25" stroke-dashoffset="94.25" stroke-linecap="round" fill="transparent" r="15" cx="18" cy="18" />
+                                <circle class="progress-ring-bg" stroke-width="4" fill="transparent" r="18" cx="22" cy="22" />
+                                <circle class="progress-ring-fill" id="progress-ring-circle" stroke="url(#progress-grad)" stroke-width="4" stroke-dasharray="113.1" stroke-dashoffset="113.1" stroke-linecap="round" fill="transparent" r="18" cx="22" cy="22" />
                             </svg>
-                            <div class="progress-percentage-center" id="progress-center-text">0%</div>
+                            <div class="progress-ring-icon">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                        </div>
+                        <div class="header-progress-stats">
+                            <span class="header-progress-percent" id="progress-percent-text">0%</span>
+                            <span class="header-progress-ratio" id="progress-ratio-text">0 of 0 taken</span>
                         </div>
                     </div>
                 </div>
@@ -493,6 +495,6 @@
     </nav>
 
     <!-- JavaScript Bundle -->
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
 </body>
 </html>
