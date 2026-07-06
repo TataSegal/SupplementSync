@@ -12,31 +12,43 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="brand">
-                <svg class="logo-svg" width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
+                <svg class="logo-svg" width="46" height="46" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
                     <defs>
-                        <!-- Premium energy and biohacking gradients -->
-                        <linearGradient id="wave-grad-1" x1="15" y1="50" x2="50" y2="50" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#ff007f"/>
-                            <stop offset="1" stop-color="#ea580c"/>
-                        </linearGradient>
-                        <linearGradient id="wave-grad-2" x1="50" y1="50" x2="85" y2="50" gradientUnits="userSpaceOnUse">
+                        <!-- High contrast colorful gradients representing cell biology and biohacking -->
+                        <linearGradient id="logo-g1" x1="15" y1="15" x2="85" y2="85" gradientUnits="userSpaceOnUse">
                             <stop stop-color="#00fad0"/>
-                            <stop offset="1" stop-color="#2563eb"/>
+                            <stop offset="0.5" stop-color="#2563eb"/>
+                            <stop offset="1" stop-color="#ff007f"/>
+                        </linearGradient>
+                        <linearGradient id="logo-g2" x1="85" y1="15" x2="15" y2="85" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#ea580c"/>
+                            <stop offset="0.5" stop-color="#ff007f"/>
+                            <stop offset="1" stop-color="#7f00ff"/>
                         </linearGradient>
                     </defs>
-                    <!-- Left Loop of Infinity (Vitality & Health) -->
-                    <path d="M 50 50 C 32 20, 10 32, 10 50 C 10 68, 32 80, 50 50" stroke="url(#wave-grad-1)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-                    <!-- Right Loop of Infinity (Biohacking & Sync) -->
-                    <path d="M 50 50 C 68 20, 90 32, 90 50 C 90 68, 68 80, 50 50" stroke="url(#wave-grad-2)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" style="mix-blend-mode: screen;"/>
-                    <!-- Center Core (Life Spark / Sync point) -->
-                    <circle cx="50" cy="50" r="4.5" fill="#ffffff" filter="drop-shadow(0 0 3px #ffffff)"/>
+                    <!-- Outer Hexagonal Bio-Grid frame -->
+                    <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" stroke="url(#logo-g1)" stroke-width="4" stroke-linejoin="round" opacity="0.3"/>
+                    
+                    <!-- Outer thin star grid lines -->
+                    <line x1="50" y1="10" x2="50" y2="90" stroke="url(#logo-g1)" stroke-width="1.5" opacity="0.2"/>
+                    <line x1="15" y1="30" x2="85" y2="70" stroke="url(#logo-g1)" stroke-width="1.5" opacity="0.2"/>
+                    <line x1="15" y1="70" x2="85" y2="30" stroke="url(#logo-g1)" stroke-width="1.5" opacity="0.2"/>
+                    
+                    <!-- Three overlapping wellness circles (DNA cross sections / cells) -->
+                    <circle cx="50" cy="38" r="18" stroke="url(#logo-g1)" stroke-width="5" opacity="0.85"/>
+                    <circle cx="39" cy="58" r="18" stroke="url(#logo-g2)" stroke-width="5" opacity="0.85"/>
+                    <circle cx="61" cy="58" r="18" stroke="url(#logo-g1)" stroke-width="5" opacity="0.85"/>
+                    
+                    <!-- Central Active Nucleus (glowing cell center) -->
+                    <circle cx="50" cy="50" r="7.5" fill="#ffffff" filter="drop-shadow(0 0 5px #00fad0)"/>
+                    <circle cx="50" cy="50" r="3.5" fill="#00fad0"/>
                 </svg>
                 <h1 class="brand-title"><span class="brand-dim">Supplement</span>Sync</h1>
             </div>
@@ -100,8 +112,8 @@
                         </div>
                         <div class="progress-circle-container">
                             <svg class="progress-ring" width="120" height="120">
-                                <circle class="progress-ring-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" />
-                                <circle class="progress-ring-fill" id="progress-ring-circle" stroke="var(--accent-teal)" stroke-width="8" stroke-dasharray="314.15" stroke-dashoffset="314.15" stroke-linecap="round" fill="transparent" r="50" cx="60" cy="60" />
+                                <circle class="progress-ring-bg" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" />
+                                <circle class="progress-ring-fill" id="progress-ring-circle" stroke-width="8" stroke-dasharray="314.15" stroke-dashoffset="314.15" stroke-linecap="round" fill="transparent" r="50" cx="60" cy="60" />
                             </svg>
                             <div class="progress-percentage-center" id="progress-center-text">0%</div>
                         </div>
@@ -486,6 +498,6 @@
     </nav>
 
     <!-- JavaScript Bundle -->
-    <script src="app.js?v=8"></script>
+    <script src="app.js?v=9"></script>
 </body>
 </html>
