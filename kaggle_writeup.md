@@ -61,6 +61,10 @@ The application integrates two specialized AI agents utilizing the Gemini API:
         2.  *Lab Test Interferences*: Identifies substances like Biotin interfering with thyroid or troponin panel readings.
         3.  *Cumulative Overdoses*: Detects overlapping active ingredients across different supplement brands.
     *   **Structured Output**: Enforces structured JSON containing `warnings_and_conflicts` (categorized as `warning` or `danger` alerts) and `timing_insights` (optimal schedule separation).
+*   **Agent Orchestrator & Lifecycle Manager**:
+    *   The client-side application logic (`app.js`) acts as the central orchestrator, managing state routing, visual loading states, and event triggers.
+    *   **Inventory Fingerprinting**: The orchestrator computes a hash of the current supplement list. If modifications are detected, it marks the existing AI analysis as stale, triggers a warning banner, and schedules a re-audit when the user initiates a safety check.
+    *   **User/Agent Handoff**: Coordinates when to invoke the *Label Extractor Agent* (upon camera/file upload), maps its structured JSON output back to the form inputs, and prompts the user for validation before saving the state.
 *   **Authentication**: Both agents send direct browser-to-Google `fetch` requests utilizing the `x-goog-api-key` HTTP header rather than query string parameters.
 *   **Demo Mode fallback**: If no API key is provided, the app runs in **Demo Mode**, bypassing active AI requests and displaying simulated loading before auto-populating mock supplement data.
 
