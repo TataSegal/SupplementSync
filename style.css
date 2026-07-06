@@ -474,7 +474,7 @@ body.dark-theme .progress-ring-bg {
     justify-content: space-between;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    padding: 16px 20px;
+    padding: 10px 16px;
     border-radius: var(--radius-md);
     transition: var(--transition-smooth);
 }
@@ -496,8 +496,8 @@ body.dark-theme .progress-ring-bg {
 .custom-checkbox-wrapper {
     position: relative;
     cursor: pointer;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
 }
 
 .custom-checkbox-wrapper input {
@@ -512,8 +512,8 @@ body.dark-theme .progress-ring-bg {
     position: absolute;
     top: 0;
     left: 0;
-    height: 24px;
-    width: 24px;
+    height: 20px;
+    width: 20px;
     background-color: var(--bg-main);
     border: 2px solid var(--text-muted);
     border-radius: 50%;
@@ -524,7 +524,7 @@ body.dark-theme .progress-ring-bg {
 }
 
 .checkbox-visual i {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: var(--bg-main);
     transform: scale(0);
     transition: var(--transition-smooth);
@@ -553,7 +553,7 @@ body.dark-theme .progress-ring-bg {
 }
 
 .item-name {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-primary);
     transition: var(--transition-smooth);
