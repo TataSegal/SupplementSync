@@ -328,7 +328,6 @@ function toggleSupplement(id) {
             supp.stock++; // Put back the stock
         }
         itemCard.classList.remove('checked');
-        showToast(`Unchecked ${supp ? supp.name : 'supplement'}.`, 'info');
     } else {
         // Mark as Taken
         state.logs.push({ date: todayStr, id: id });
@@ -339,7 +338,6 @@ function toggleSupplement(id) {
         
         // Dynamic Streak Calculation on checking a task
         checkStreakAchievement();
-        showToast(`Took ${supp ? supp.name : 'supplement'}. Daily log updated!`, 'success');
     }
     
     saveState();
