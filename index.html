@@ -12,25 +12,29 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="brand">
-                <svg class="logo-svg" width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 10px var(--accent-teal-glow));">
-                    <circle cx="50" cy="50" r="42" stroke="url(#logo-grad)" stroke-width="8" stroke-dasharray="190 60" stroke-linecap="round"/>
-                    <rect x="44" y="24" width="12" height="52" rx="6" fill="url(#logo-grad)"/>
-                    <rect x="24" y="44" width="52" height="12" rx="6" fill="url(#logo-grad)"/>
+                <svg class="logo-svg" width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Overlapping Pill Capsules in premium gradients -->
+                    <rect x="18" y="38" width="54" height="24" rx="12" transform="rotate(-30 45 50)" fill="url(#pill-grad-1)"/>
+                    <rect x="28" y="38" width="54" height="24" rx="12" transform="rotate(30 55 50)" fill="url(#pill-grad-2)" style="mix-blend-mode: screen;"/>
                     <defs>
-                        <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="var(--accent-teal-dark)"/>
-                            <stop offset="1" stop-color="var(--accent-teal)"/>
+                        <linearGradient id="pill-grad-1" x1="18" y1="38" x2="72" y2="62" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#00fad0"/>
+                            <stop offset="1" stop-color="#0072ff"/>
+                        </linearGradient>
+                        <linearGradient id="pill-grad-2" x1="28" y1="38" x2="82" y2="62" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#ff007f"/>
+                            <stop offset="1" stop-color="#7f00ff"/>
                         </linearGradient>
                     </defs>
                 </svg>
-                <h1 class="brand-title" style="font-weight: 800; letter-spacing: -0.5px; font-size: 1.6rem; color: var(--text-primary);">Sync</h1>
+                <h1 class="brand-title"><span class="brand-dim">Supplement</span>Sync</h1>
             </div>
             
             <nav class="nav-menu">
@@ -478,6 +482,6 @@
     </nav>
 
     <!-- JavaScript Bundle -->
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
 </body>
 </html>
