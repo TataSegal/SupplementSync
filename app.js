@@ -1001,16 +1001,16 @@ function renderAuditResults(conflicts) {
     const resultsContainer = document.getElementById('safety-audit-results');
     
     let html = `
-        <h4 style="margin-bottom: 1rem; color: #ffffff;"><i class="fa-solid fa-stethoscope" style="color: var(--accent-teal);"></i> Audit Results</h4>
+        <h4 style="margin-bottom: 1.25rem; color: #ffffff;"><i class="fa-solid fa-stethoscope" style="color: var(--accent-teal);"></i> Audit Results</h4>
     `;
     
     if (conflicts.length === 0) {
         html += `
-            <div style="background-color: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-md); padding: 1.25rem; display: flex; gap: 12px; align-items: start; margin-bottom: 1rem;">
-                <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1.25rem; margin-top: 2px;"></i>
-                <div>
-                    <h5 style="color: #10b981; font-weight: 600; margin-bottom: 4px;">No Local Conflicts Found</h5>
-                    <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.4;">All supplements checked against our local database are compatible. Keep it up!</p>
+            <div class="safety-card success">
+                <i class="fa-solid fa-circle-check safety-card-icon"></i>
+                <div class="safety-card-content">
+                    <h5>No Conflicts Found</h5>
+                    <p>All supplements checked are compatible. Keep it up!</p>
                 </div>
             </div>
         `;
@@ -1018,17 +1018,14 @@ function renderAuditResults(conflicts) {
         conflicts.forEach(conflict => {
             const isDanger = conflict.type === 'danger';
             const icon = isDanger ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
-            const colorClass = isDanger ? 'red' : 'orange';
-            const borderClass = isDanger ? 'rgba(239, 68, 68, 0.2)' : 'rgba(249, 115, 22, 0.2)';
-            const titleColor = isDanger ? '#ef4444' : '#f97316';
-            const bgColor = isDanger ? 'rgba(239, 68, 68, 0.05)' : 'rgba(249, 115, 22, 0.05)';
+            const severityClass = isDanger ? 'danger' : 'warning';
             
             html += `
-                <div style="background-color: ${bgColor}; border: 1px solid ${borderClass}; border-radius: var(--radius-md); padding: 1.25rem; display: flex; gap: 12px; align-items: start; margin-bottom: 1rem;">
-                    <i class="fa-solid ${icon}" style="color: ${titleColor}; font-size: 1.25rem; margin-top: 2px;"></i>
-                    <div>
-                        <h5 style="color: ${titleColor}; font-weight: 600; margin-bottom: 4px; text-transform: capitalize;">${conflict.type}</h5>
-                        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.4;">${conflict.message}</p>
+                <div class="safety-card ${severityClass}">
+                    <i class="fa-solid ${icon} safety-card-icon"></i>
+                    <div class="safety-card-content">
+                        <h5>${conflict.type}</h5>
+                        <p>${conflict.message}</p>
                     </div>
                 </div>
             `;
@@ -1037,8 +1034,8 @@ function renderAuditResults(conflicts) {
     
     // Add Medical Disclaimer
     html += `
-        <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1.5rem;">
-            <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+        <div class="safety-disclaimer">
+            <p>
                 <strong>⚠️ Disclaimer:</strong> This safety audit is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a physician or healthcare provider before starting, stopping, or changing any supplement schedule.
             </p>
         </div>

@@ -145,7 +145,7 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-outline scan-btn" onclick="checkSafetyAndInteractions()">
+                        <button class="btn btn-outline safety-audit-btn" onclick="checkSafetyAndInteractions()">
                             <i class="fa-solid fa-shield-halved"></i> Safety Audit
                         </button>
                         <button class="btn btn-primary" onclick="openAddModal()">
@@ -417,13 +417,13 @@
                     <!-- Results populated dynamically by JS -->
                 </div>
                 
-                <div class="ai-consent-box" id="ai-consent-box" style="display: none; margin-top: 1.5rem; padding: 1rem; background-color: rgba(13, 255, 214, 0.05); border: 1px dashed var(--accent-teal); border-radius: var(--radius-md);">
-                    <h4 style="color: var(--accent-teal); margin-bottom: 0.5rem;"><i class="fa-solid fa-brain"></i> Ask Gemini AI?</h4>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;" id="ai-consent-message">
+                <div class="ai-consent-card" id="ai-consent-box" style="display: none;">
+                    <h4><i class="fa-solid fa-brain"></i> Ask Gemini AI?</h4>
+                    <p id="ai-consent-message">
                         Some supplements are missing from our local database. Would you like to run a secure AI compatibility check?
                     </p>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-primary" onclick="runAISafetyCheck()" style="flex: 1; padding: 8px 16px; background: linear-gradient(to right, var(--accent-teal-dark), #00fad0) !important; color: #000; border: none; font-weight: 600;">
+                        <button class="btn btn-primary" onclick="runAISafetyCheck()" style="flex: 1; padding: 8px 16px;">
                             <i class="fa-solid fa-bolt"></i> Run AI Check
                         </button>
                         <button class="btn btn-outline" onclick="dismissAIConsent()" style="padding: 8px 16px;">No, Skip</button>
