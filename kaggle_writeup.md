@@ -29,7 +29,7 @@ The application is structured as a client-side web application to reduce backend
        │ (Base64 Image Data)
        ▼
 [Web Browser (HTML5 + CSS3 + ES6 JS)] ◄───► [LocalStorage (State, Logs, API Key)]
-       │ (Direct Secure HTTPS Request)
+       │ (Direct HTTPS Request)
        ▼
 [Google Gemini API (gemini-2.5-flash)]
 ```
@@ -58,9 +58,9 @@ The application is structured as a client-side web application to reduce backend
 ## 🔒 Security & Production Best Practices
 > [!IMPORTANT]
 > **Prototype Design Considerations**:
-> Keeping the app serverless and client-side allows free hosting on GitHub Pages and isolates personal health logs to the user's browser. However, storing API keys in `localStorage` and making client-side API requests exposes the keys to client-side risks (such as XSS attacks or physical device/profile compromise), violating OWASP production guidelines.
+> Keeping the app serverless and client-side allows free hosting on GitHub Pages and keeps personal health logs in the user’s browser rather than sending them to a dedicated application backend. However, storing API keys in `localStorage` and making client-side API requests exposes the keys to client-side risks (such as XSS attacks or physical device/profile compromise), which is inconsistent with OWASP guidance for sensitive client-side storage.
 > 
-> *   **Key Restriction Mitigation**: To reduce the blast radius in this client-side architecture, the application prompts users to restrict their API keys to the **"Gemini API" only** inside their Google AI Studio or GCP console.
+> *   **Key Restriction Mitigation**: As a partial risk-reduction measure, users are advised to restrict their key to the Gemini API only. This reduces potential cross-service abuse if the key is exposed, but does not make client-side key storage production-safe.
 > 
 > **Production Recommendation**:
 > For a commercial, production-grade deployment, the architecture should be refactored to introduce a **secure backend proxy/gateway** (e.g., hosted on Google Cloud Run or Cloud Functions). The backend proxy would:
