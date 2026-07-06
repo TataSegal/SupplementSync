@@ -12,7 +12,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
     <div class="app-container">
@@ -80,16 +80,18 @@
                 <div class="header-info" style="flex: 1; min-width: 0;">
                     <p class="date-today" id="current-date">Sunday, July 5</p>
                     <div class="welcome-row">
-                        <h2 class="welcome-text">Your Wellness Journey</h2>
-                        <div class="header-progress-badge" id="header-progress-container">
-                            <span id="progress-ratio">0 / 0</span>
-                            <span class="progress-badge-separator">•</span>
-                            <span id="progress-percent">0%</span>
+                        <div class="welcome-text-group">
+                            <h2 class="welcome-text">Your Wellness Journey</h2>
+                            <p class="header-progress-sub" id="progress-ratio-text">0 of 0 completed today</p>
                         </div>
-                    </div>
-                    <!-- Sleek, modern micro progress bar -->
-                    <div class="header-progress-bar-container">
-                        <div class="header-progress-bar-fill" id="header-progress-bar-fill" style="width: 0%;"></div>
+                        <!-- Tiny circular progress ring next to title -->
+                        <div class="header-progress-ring-container">
+                            <svg class="progress-ring" width="50" height="50">
+                                <circle class="progress-ring-bg" stroke-width="4" fill="transparent" r="21" cx="25" cy="25" />
+                                <circle class="progress-ring-fill" id="progress-ring-circle" stroke-width="4" stroke-dasharray="131.95" stroke-dashoffset="131.95" stroke-linecap="round" fill="transparent" r="21" cx="25" cy="25" />
+                            </svg>
+                            <div class="progress-percentage-center" id="progress-center-text">0%</div>
+                        </div>
                     </div>
                 </div>
                 <div class="quick-stats-row" style="margin-left: 20px;">
@@ -485,6 +487,6 @@
     </nav>
 
     <!-- JavaScript Bundle -->
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=11"></script>
 </body>
 </html>
