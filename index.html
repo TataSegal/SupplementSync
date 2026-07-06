@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Supplement Sync - A premium daily supplement and vitamin tracker with smart scheduling, inventory alerts, and progress analytics.">
+    <title>Supplement Sync - Daily Vitamin & Tracker</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-rotate"></i>
+                </div>
+                <h1>Sync</h1>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" id="tab-today-btn" onclick="switchTab('today')">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Today</span>
+                </button>
+                <button class="nav-item" id="tab-supplements-btn" onclick="switchTab('supplements')">
+                    <i class="fa-solid fa-pills"></i>
+                    <span>My Inventory</span>
+                </button>
+                <button class="nav-item" id="tab-analytics-btn" onclick="switchTab('analytics')">
+                    <i class="fa-solid fa-chart-simple"></i>
+                    <span>Insights</span>
+                </button>
+                <button class="nav-item" id="tab-settings-btn" onclick="switchTab('settings')">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p class="app-version">v1.0.0</p>
+                <p class="copyright">Local Storage Active</p>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-info">
+                    <p class="date-today" id="current-date">Sunday, July 5</p>
+                    <h2 class="welcome-text">Your Wellness Journey</h2>
+                </div>
+                <div class="quick-stats-row">
+                    <div class="header-stat">
+                        <span class="stat-value" id="streak-count">0</span>
+                        <span class="stat-label"><i class="fa-solid fa-fire fire-icon"></i> Day Streak</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: TODAY'S TRACKER -->
+            <section class="tab-content active" id="tab-today">
+                <div class="dashboard-grid">
+                    <!-- Progress Card -->
+                    <div class="card progress-card">
+                        <div class="progress-info">
+                            <h3>Daily Progress</h3>
+                            <p>Track your schedule for today</p>
+                            <div class="progress-details">
+                                <span class="completed-ratio" id="progress-ratio">0 / 0</span>
+                                <span class="completed-percentage" id="progress-percent">0%</span>
+                            </div>
+                        </div>
+                        <div class="progress-circle-container">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="8" fill="transparent" r="50" cx="60" cy="60" />
+                                <circle class="progress-ring-fill" id="progress-ring-circle" stroke="var(--accent-teal)" stroke-width="8" stroke-dasharray="314.15" stroke-dashoffset="314.15" stroke-linecap="round" fill="transparent" r="50" cx="60" cy="60" />
+                            </svg>
+                            <div class="progress-percentage-center" id="progress-center-text">0%</div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Schedule Card -->
+                    <div class="card checklist-card">
+                        <div class="checklist-header">
+                            <h3>Checklist</h3>
+                            <span class="date-badge" id="today-day-name">Today</span>
+                        </div>
+                        
+                        <!-- Empty State -->
+                        <div class="empty-state" id="today-empty-state">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            <p>No supplements scheduled for today.</p>
+                            <button class="btn btn-primary" onclick="openAddModal()">Add Your First Supplement</button>
+                        </div>
+
+                        <!-- Schedule Sections -->
+                        <div class="schedule-groups" id="schedule-groups" style="display: none;">
+                            <!-- Morning Section -->
+                            <div class="time-group" id="group-morning">
+                                <div class="time-group-header">
+                                    <i class="fa-solid fa-sun morning-icon"></i>
+                                    <h4>Morning</h4>
+                                </div>
+                                <div class="checklist-items" id="items-morning"></div>
+                            </div>
+
+                            <!-- Afternoon Section -->
+                            <div class="time-group" id="group-afternoon">
+                                <div class="time-group-header">
+                                    <i class="fa-solid fa-cloud-sun afternoon-icon"></i>
+                                    <h4>Afternoon</h4>
+                                </div>
+                                <div class="checklist-items" id="items-afternoon"></div>
+                            </div>
+
+                            <!-- Evening Section -->
+                            <div class="time-group" id="group-evening">
+                                <div class="time-group-header">
+                                    <i class="fa-solid fa-moon evening-icon"></i>
+                                    <h4>Evening</h4>
+                                </div>
+                                <div class="checklist-items" id="items-evening"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: MY INVENTORY -->
+            <section class="tab-content" id="tab-supplements">
+                <div class="inventory-header">
+                    <div class="search-filter-row">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="inventory-search" placeholder="Search supplements..." oninput="filterSupplements()">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddModal()">
+                        <i class="fa-solid fa-plus"></i> Add Supplement
+                    </button>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="inventory-empty-state">
+                    <i class="fa-solid fa-pills"></i>
+                    <p>Your inventory is empty. Start adding supplements to build your schedule.</p>
+                    <button class="btn btn-primary" onclick="openAddModal()">Add Supplement</button>
+                </div>
+
+                <div class="inventory-grid" id="inventory-grid"></div>
+            </section>
+
+            <!-- TAB 3: INSIGHTS & STATS -->
+            <section class="tab-content" id="tab-analytics">
+                <div class="analytics-row">
+                    <div class="card stat-card">
+                        <div class="stat-icon-wrapper blue">
+                            <i class="fa-solid fa-check-double"></i>
+                        </div>
+                        <div class="stat-number-info">
+                            <h4 id="analytics-total-taken">0</h4>
+                            <p>Total Doses Taken</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon-wrapper green">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <div class="stat-number-info">
+                            <h4 id="analytics-adherence">0%</h4>
+                            <p>Average Adherence</p>
+                        </div>
+                    </div>
+
+                    <div class="card stat-card">
+                        <div class="stat-icon-wrapper orange">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="stat-number-info">
+                            <h4 id="analytics-low-stock">0</h4>
+                            <p>Low Stock Items</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card chart-card">
+                    <h3>Completion History (Last 7 Days)</h3>
+                    <div class="bar-chart-container" id="bar-chart-container">
+                        <!-- Bars dynamically rendered by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: SETTINGS -->
+            <section class="tab-content" id="tab-settings">
+                <div class="settings-grid">
+                    <div class="card settings-card">
+                        <h3><i class="fa-solid fa-database"></i> Data Management</h3>
+                        <p class="settings-desc">Backup, restore, or reset your local supplement schedules and statistics.</p>
+                        
+                        <div class="settings-actions">
+                            <button class="btn btn-outline" onclick="exportData()">
+                                <i class="fa-solid fa-file-export"></i> Export Data (JSON)
+                            </button>
+                            
+                            <label class="btn btn-outline file-input-label">
+                                <i class="fa-solid fa-file-import"></i> Import Data (JSON)
+                                <input type="file" id="import-file" style="display: none;" onchange="importData(event)">
+                            </label>
+
+                            <button class="btn btn-danger" onclick="resetAllData()">
+                                <i class="fa-solid fa-trash-can"></i> Factory Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI SCANNER SETTINGS -->
+                    <div class="card settings-card">
+                        <h3><i class="fa-solid fa-brain"></i> AI Scanner Settings</h3>
+                        <p class="settings-desc">Configure your Gemini API key to enable smart label scanning. The key is stored locally in your browser.</p>
+                        
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <input type="password" id="api-key-input" placeholder="Enter Gemini API Key (AIzaSy...)" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff;">
+                        </div>
+                        <div class="settings-actions">
+                            <button class="btn btn-primary" onclick="saveApiKey()">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Key
+                            </button>
+                            <button class="btn btn-outline" onclick="clearApiKey()">
+                                <i class="fa-solid fa-eraser"></i> Clear Key
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <h3><i class="fa-solid fa-circle-info"></i> About Supplement Sync</h3>
+                        <p class="settings-desc">A fully local application. Your data never leaves your computer.</p>
+                        <div class="about-features">
+                            <div class="about-feature">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <div>
+                                    <h5>100% Client-Side</h5>
+                                    <p>All routines, logs, and stock levels are saved securely in your browser's Local Storage.</p>
+                                </div>
+                            </div>
+                            <div class="about-feature">
+                                <i class="fa-solid fa-cloud-arrow-down"></i>
+                                <div>
+                                    <h5>Offline First</h5>
+                                    <p>Runs perfectly without an internet connection once loaded.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ADD / EDIT SUPPLEMENT MODAL -->
+    <div class="modal-overlay" id="supplement-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Supplement</h3>
+                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="supplement-form" onsubmit="saveSupplement(event)">
+                <input type="hidden" id="edit-id">
+                
+                <div class="form-group">
+                    <label for="supp-name">Supplement Name</label>
+                    <div class="scanner-input-group">
+                        <input type="text" id="supp-name" required placeholder="e.g., Vitamin D3, Omega-3">
+                        <button type="button" class="btn btn-outline scan-btn" onclick="initiateScan()">
+                            <i class="fa-solid fa-camera"></i> Scan Label
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="supp-dosage">Dosage</label>
+                        <input type="text" id="supp-dosage" required placeholder="e.g., 1 pill, 5000 IU, 2 capsules">
+                    </div>
+                    <div class="form-group">
+                        <label for="supp-time">Time of Day</label>
+                        <select id="supp-time" required>
+                            <option value="morning">Morning</option>
+                            <option value="afternoon">Afternoon</option>
+                            <option value="evening">Evening</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Days of Week</label>
+                    <div class="days-selector">
+                        <label class="day-checkbox">
+                            <input type="checkbox" value="1" checked name="days">
+                            <span>Mon</span>
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" value="2" checked name="days">
+                            <span>Tue</span>
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" value="3" checked name="days">
+                            <span>Wed</span>
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" value="4" checked name="days">
+                            <span>Thu</span>
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" value="5" checked name="days">
+                            <span>Fri</span>
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" value="6" checked name="days">
+                            <span>Sat</span>
+                        </label>
+                        <label class="day-checkbox">
+                            <input type="checkbox" value="0" checked name="days">
+                            <span>Sun</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="supp-stock">Current Stock (Pills/ml)</label>
+                        <input type="number" id="supp-stock" placeholder="e.g., 60" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="supp-limit">Low Stock Alert Limit</label>
+                        <input type="number" id="supp-limit" placeholder="e.g., 10" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="supp-notes">Notes / Instructions</label>
+                    <input type="text" id="supp-notes" placeholder="e.g., Take with fatty meal, absorb under tongue">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">Save Supplement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- SCANNER MODAL -->
+    <div class="modal-overlay" id="scanner-modal">
+        <div class="modal scanner-modal-content">
+            <div class="modal-header">
+                <h3>Scan Supplement Label</h3>
+                <button class="close-btn" onclick="closeScanner()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="scanner-body">
+                <div class="camera-container">
+                    <video id="scanner-video" autoplay playsinline></video>
+                    <canvas id="scanner-canvas" style="display: none;"></canvas>
+                    <div class="scan-laser"></div>
+                    <div class="scanner-placeholder" id="scanner-placeholder">
+                        <i class="fa-solid fa-video-slash"></i>
+                        <p>Camera not active</p>
+                    </div>
+                    <!-- Scanner Loading overlay -->
+                    <div class="scanner-loading" id="scanner-loading">
+                        <div class="spinner"></div>
+                        <p>AI analyzing label...</p>
+                    </div>
+                </div>
+                
+                <div class="scanner-controls">
+                    <button type="button" class="btn btn-primary" id="capture-btn" onclick="captureFrame()">
+                        <i class="fa-solid fa-camera"></i> Capture Photo
+                    </button>
+                    <label class="btn btn-outline file-input-label">
+                        <i class="fa-solid fa-upload"></i> Upload Image
+                        <input type="file" id="scanner-file-input" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                    </label>
+                    <button type="button" class="btn btn-outline cancel-btn" onclick="closeScanner()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Bundle -->
+    <script src="app.js"></script>
+</body>
+</html>
