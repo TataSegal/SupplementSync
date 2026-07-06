@@ -916,3 +916,228 @@ function autofillForm(name, dosage, notes) {
     if (dosage) document.getElementById('supp-dosage').value = dosage;
     if (notes) document.getElementById('supp-notes').value = notes;
 }
+
+// ==========================================
+// SAFETY AUDIT & COMPATIBILITY CHECK
+// ==========================================
+let currentLocalAuditResults = [];
+
+function checkSafetyAndInteractions() {
+    const modal = document.getElementById('safety-modal');
+    modal.classList.add('active');
+    
+    const resultsContainer = document.getElementById('safety-audit-results');
+    resultsContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:30px; height:30px;"></div></div>`;
+    
+    document.getElementById('ai-consent-box').style.display = 'none';
+    
+    if (state.supplements.length === 0) {
+        resultsContainer.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                <i class="fa-solid fa-clipboard-question" style="font-size: 2.5rem; opacity: 0.5; margin-bottom: 12px; display: block;"></i>
+                <p>Your inventory is empty. Add supplements first to run a safety audit.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Fetch local interactions
+    fetch('interactions.json')
+    .then(response => {
+        if (!response.ok) throw new Error("Could not load local safety database");
+        return response.json();
+    })
+    .then(rules => {
+        runLocalAudit(rules);
+    })
+    .catch(err => {
+        console.error("Local safety audit load error:", err);
+        resultsContainer.innerHTML = `<p style="color: #ef4444; text-align:center;">Failed to load safety database.</p>`;
+    });
+}
+
+function runLocalAudit(rules) {
+    const resultsContainer = document.getElementById('safety-audit-results');
+    const matchedConflicts = [];
+    const activeSuppNames = state.supplements.map(s => s.name.toLowerCase());
+    
+    // Check conflicts
+    rules.forEach(rule => {
+        const matchingIngredients = rule.ingredients.filter(ing => {
+            return activeSuppNames.some(suppName => suppName.includes(ing.toLowerCase()));
+        });
+        
+        // If all ingredients of the conflict rule are present, it's a conflict
+        if (matchingIngredients.length === rule.ingredients.length) {
+            matchedConflicts.push(rule);
+        }
+    });
+    
+    currentLocalAuditResults = matchedConflicts;
+    renderAuditResults(matchedConflicts);
+    
+    // Check if there are active supplements not covered by the local interactions database
+    const allKnownIngredients = new Set();
+    rules.forEach(rule => rule.ingredients.forEach(ing => allKnownIngredients.add(ing.toLowerCase())));
+    
+    const uncoveredSupplements = state.supplements.filter(s => {
+        const nameLower = s.name.toLowerCase();
+        return !Array.from(allKnownIngredients).some(ing => nameLower.includes(ing));
+    });
+    
+    if (uncoveredSupplements.length > 0) {
+        const consentBox = document.getElementById('ai-consent-box');
+        const consentMessage = document.getElementById('ai-consent-message');
+        const listNames = uncoveredSupplements.map(s => `"${s.name}"`).join(', ');
+        
+        consentMessage.innerHTML = `Our local database does not contain safety rules for: <strong>${listNames}</strong>. Would you like to run a deep AI compatibility audit using the Gemini API?`;
+        consentBox.style.display = 'block';
+    } else {
+        document.getElementById('ai-consent-box').style.display = 'none';
+    }
+}
+
+function renderAuditResults(conflicts) {
+    const resultsContainer = document.getElementById('safety-audit-results');
+    
+    let html = `
+        <h4 style="margin-bottom: 1rem; color: #ffffff;"><i class="fa-solid fa-stethoscope" style="color: var(--accent-teal);"></i> Audit Results</h4>
+    `;
+    
+    if (conflicts.length === 0) {
+        html += `
+            <div style="background-color: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-md); padding: 1.25rem; display: flex; gap: 12px; align-items: start; margin-bottom: 1rem;">
+                <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1.25rem; margin-top: 2px;"></i>
+                <div>
+                    <h5 style="color: #10b981; font-weight: 600; margin-bottom: 4px;">No Local Conflicts Found</h5>
+                    <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.4;">All supplements checked against our local database are compatible. Keep it up!</p>
+                </div>
+            </div>
+        `;
+    } else {
+        conflicts.forEach(conflict => {
+            const isDanger = conflict.type === 'danger';
+            const icon = isDanger ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
+            const colorClass = isDanger ? 'red' : 'orange';
+            const borderClass = isDanger ? 'rgba(239, 68, 68, 0.2)' : 'rgba(249, 115, 22, 0.2)';
+            const titleColor = isDanger ? '#ef4444' : '#f97316';
+            const bgColor = isDanger ? 'rgba(239, 68, 68, 0.05)' : 'rgba(249, 115, 22, 0.05)';
+            
+            html += `
+                <div style="background-color: ${bgColor}; border: 1px solid ${borderClass}; border-radius: var(--radius-md); padding: 1.25rem; display: flex; gap: 12px; align-items: start; margin-bottom: 1rem;">
+                    <i class="fa-solid ${icon}" style="color: ${titleColor}; font-size: 1.25rem; margin-top: 2px;"></i>
+                    <div>
+                        <h5 style="color: ${titleColor}; font-weight: 600; margin-bottom: 4px; text-transform: capitalize;">${conflict.type}</h5>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.4;">${conflict.message}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    // Add Medical Disclaimer
+    html += `
+        <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1.5rem;">
+            <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin: 0;">
+                <strong>⚠️ Disclaimer:</strong> This safety audit is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a physician or healthcare provider before starting, stopping, or changing any supplement schedule.
+            </p>
+        </div>
+    `;
+    
+    resultsContainer.innerHTML = html;
+}
+
+function closeSafetyModal() {
+    document.getElementById('safety-modal').classList.remove('active');
+}
+
+function dismissAIConsent() {
+    document.getElementById('ai-consent-box').style.display = 'none';
+}
+
+function runAISafetyCheck() {
+    if (!state.geminiApiKey || state.geminiApiKey.trim() === "") {
+        showToast("Please enter a Gemini API Key in Settings to run the AI check.", "warning");
+        return;
+    }
+    
+    const resultsContainer = document.getElementById('safety-audit-results');
+    resultsContainer.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 3rem; gap:16px;">
+            <div class="spinner"></div>
+            <p style="color: var(--accent-teal); font-weight:600; animation: pulse 1.5s infinite;">Gemini AI conducting safety audit...</p>
+        </div>
+    `;
+    document.getElementById('ai-consent-box').style.display = 'none';
+    
+    const apiKey = state.geminiApiKey.trim();
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    
+    const suppList = state.supplements.map(s => `- ${s.name} (${s.dosage || "no dosage specified"})`).join('\n');
+    
+    const promptText = `Analyze this list of supplements for potential negative interactions, competitive absorption, dosage overlaps, or warnings. Consider synergistic benefits too.
+Supplements List:
+${suppList}
+
+Format your response as a clean JSON array (no markdown wraps, no backticks) where each object has these keys:
+- "type": "warning" or "danger"
+- "message": A concise, clear explanation of the interaction and action-item advice.
+- "ingredients": An array of ingredients involved.
+
+If there are absolutely no interactions, return an empty array [].
+Respond ONLY with the raw JSON array.`;
+
+    const requestBody = {
+        contents: [
+            {
+                parts: [{ text: promptText }]
+            }
+        ],
+        generationConfig: {
+            responseMimeType: "application/json"
+        }
+    };
+    
+    fetch(endpoint, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`API error: ${response.status} ${response.statusText}`);
+        return response.json();
+    })
+    .then(data => {
+        const textResponse = data.candidates[0].content.parts[0].text;
+        try {
+            const aiConflicts = JSON.parse(textResponse.trim());
+            
+            // Combine with local conflicts
+            const combined = [...currentLocalAuditResults, ...aiConflicts];
+            
+            // Deduplicate conflicts by message
+            const unique = [];
+            const seen = new Set();
+            combined.forEach(c => {
+                if (!seen.has(c.message)) {
+                    seen.add(c.message);
+                    unique.push(c);
+                }
+            });
+            
+            renderAuditResults(unique);
+            showToast("Gemini AI Safety Audit completed!", "success");
+        } catch (parseErr) {
+            console.error("AI JSON parsing error:", textResponse, parseErr);
+            showToast("Failed to parse AI response. Please try again.", "error");
+            renderAuditResults(currentLocalAuditResults);
+        }
+    })
+    .catch(err => {
+        console.error("AI Safety Check Error:", err);
+        showToast("AI Safety Check failed: " + err.message, "error");
+        renderAuditResults(currentLocalAuditResults);
+    });
+}
