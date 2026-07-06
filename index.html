@@ -12,7 +12,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
     <div class="app-container">
@@ -21,33 +21,22 @@
             <div class="brand">
                 <svg class="logo-svg" width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
                     <defs>
-                        <linearGradient id="flask-liquid" x1="25" y1="64" x2="75" y2="85" gradientUnits="userSpaceOnUse">
+                        <!-- Premium energy and biohacking gradients -->
+                        <linearGradient id="wave-grad-1" x1="15" y1="50" x2="50" y2="50" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#ff007f"/>
+                            <stop offset="1" stop-color="#ea580c"/>
+                        </linearGradient>
+                        <linearGradient id="wave-grad-2" x1="50" y1="50" x2="85" y2="50" gradientUnits="userSpaceOnUse">
                             <stop stop-color="#00fad0"/>
                             <stop offset="1" stop-color="#2563eb"/>
                         </linearGradient>
-                        <linearGradient id="leaf-grad" x1="45" y1="30" x2="58" y2="60" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#10b981"/>
-                            <stop offset="1" stop-color="#059669"/>
-                        </linearGradient>
                     </defs>
-                    
-                    <!-- Liquid wave inside flask -->
-                    <path d="M29 64 C35 62, 45 66, 50 64 C55 62, 65 66, 71 64 L75 72 A28 28 0 0 1 25 72 Z" fill="url(#flask-liquid)" opacity="0.9"/>
-                    
-                    <!-- Flask Outline -->
-                    <path d="M42 38 L25 72 A28 28 0 1 0 75 72 L58 38 Z" stroke="var(--text-primary)" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
-                    <rect x="42" y="24" width="16" height="14" rx="2" stroke="var(--text-primary)" stroke-width="6"/>
-                    <line x1="38" y1="24" x2="62" y2="24" stroke="var(--text-primary)" stroke-width="6" stroke-linecap="round"/>
-                    
-                    <!-- Sprout growing out of neck -->
-                    <path d="M50 56 C50 44, 42 38, 50 26 C58 38, 50 44, 50 56" fill="url(#leaf-grad)"/>
-                    <path d="M50 42 C54 38, 60 38, 60 42 C60 46, 54 46, 50 42" fill="url(#leaf-grad)"/>
-                    
-                    <!-- Glowing biohacking bubbles / energy (fun & vitality) -->
-                    <circle cx="28" cy="46" r="5" fill="#ff007f" filter="drop-shadow(0 0 4px #ff007f)"/>
-                    <circle cx="72" cy="42" r="6" fill="#00fad0" filter="drop-shadow(0 0 4px #00fad0)"/>
-                    <circle cx="50" cy="14" r="4.5" fill="#ea580c" filter="drop-shadow(0 0 4px #ea580c)"/>
-                    <circle cx="64" cy="16" r="3.5" fill="#ff007f"/>
+                    <!-- Left Loop of Infinity (Vitality & Health) -->
+                    <path d="M 50 50 C 32 20, 10 32, 10 50 C 10 68, 32 80, 50 50" stroke="url(#wave-grad-1)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Right Loop of Infinity (Biohacking & Sync) -->
+                    <path d="M 50 50 C 68 20, 90 32, 90 50 C 90 68, 68 80, 50 50" stroke="url(#wave-grad-2)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" style="mix-blend-mode: screen;"/>
+                    <!-- Center Core (Life Spark / Sync point) -->
+                    <circle cx="50" cy="50" r="4.5" fill="#ffffff" filter="drop-shadow(0 0 3px #ffffff)"/>
                 </svg>
                 <h1 class="brand-title"><span class="brand-dim">Supplement</span>Sync</h1>
             </div>
@@ -497,6 +486,6 @@
     </nav>
 
     <!-- JavaScript Bundle -->
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>
