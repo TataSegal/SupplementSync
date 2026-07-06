@@ -12,6 +12,7 @@ agents:
       Your job is to analyze the user's intent and route the task to the appropriate agent:
       - If the user provides a photo or image of a supplement bottle/label, delegate the task to the label_extractor_agent.
       - If the user asks about supplement safety, compatibility, interactions, or overlaps, delegate to the safety_auditor_agent.
+      - If the user requests intake history reports, compliance logs, stock replenishment advice, or inventory administration assistance, delegate to the inventory_analyst_agent.
     skills:
       - orchestration_skill
 
@@ -40,3 +41,16 @@ agents:
       Return a detailed report.
     skills:
       - safety_auditor_skill
+
+  - name: inventory_analyst_agent
+    description: "Analyzes supplement intake logs, calculates compliance, and predicts stock replenishment needs."
+    model: gemini-2.5-flash
+    instruction: |
+      You are an expert data analyst specializing in health tracking and supply chain planning.
+      Given a history of supplement intake logs and current inventory levels:
+      1. Calculate compliance rates (percentage of scheduled doses taken).
+      2. Analyze trends in missed doses.
+      3. Estimate depletion dates for each supplement and recommend reorder times.
+      Return a formatted summary report.
+    skills:
+      - inventory_analytics_skill
