@@ -61,6 +61,8 @@ The application is structured as a **Zero-Backend Serverless Client-Side App** t
 > **Prototype Design Considerations**:
 > Keeping the app 100% serverless and client-side allows free hosting on GitHub Pages and isolates personal health logs to the user's browser. However, storing API keys in `localStorage` and making client-side API requests exposes the keys to client-side risks (such as XSS attacks or physical device/profile compromise), violating OWASP production guidelines.
 > 
+> *   **Key Restriction Mitigation**: To minimize risk in this client-side architecture, the application explicitly prompts and guides users to restrict their API keys to the **"Gemini API" only** inside their Google AI Studio or GCP console. This ensures that even in the event of local exposure, the key cannot be abused to access other Google Cloud API resources.
+> 
 > **Production Recommendation**:
 > For a commercial, production-grade deployment, the architecture should be refactored to introduce a **secure backend proxy/gateway** (e.g., hosted on Google Cloud Run or Cloud Functions). The backend proxy would:
 > 1. Store the Gemini API key securely in server-side environment variables or Secret Manager.
