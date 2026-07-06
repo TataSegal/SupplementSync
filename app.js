@@ -966,6 +966,10 @@ function autofillForm(name, dosage, notes) {
 // ==========================================
 let currentLocalAuditResults = [];
 
+function getCurrentInventoryFingerprint() {
+    return state.supplements.map(s => s.name.toLowerCase()).sort().join('|');
+}
+
 function runSafetyPageAudit() {
     const conflictsContainer = document.getElementById('page-conflicts-results');
     const timingContainer = document.getElementById('page-timing-results');
