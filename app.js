@@ -97,11 +97,17 @@ function loadState() {
             if (state.lastAuditFingerprint === undefined) {
                 state.lastAuditFingerprint = "";
             }
-            if (state.lastAiConflicts === undefined) {
+            if (state.lastAiConflicts === undefined || !Array.isArray(state.lastAiConflicts)) {
                 state.lastAiConflicts = [];
             }
-            if (state.lastAiTiming === undefined) {
+            if (state.lastAiTiming === undefined || !Array.isArray(state.lastAiTiming)) {
                 state.lastAiTiming = [];
+            }
+            if (state.supplements === undefined || !Array.isArray(state.supplements)) {
+                state.supplements = [];
+            }
+            if (state.logs === undefined || !Array.isArray(state.logs)) {
+                state.logs = [];
             }
         } catch (e) {
             console.error("Error parsing stored state, resetting.", e);
@@ -1043,7 +1049,7 @@ function runSafetyPageAudit() {
     })
     .catch(err => {
         console.error("Local safety audit load error:", err);
-        conflictsContainer.innerHTML = `<p style="color: #ef4444; text-align:center; font-size: 0.85rem;">Failed to load safety database.</p>`;
+        conflictsContainer.innerHTML = `<p style="color: #ef4444; text-align:center; font-size: 0.85rem;">Failed to load safety database: ${err.message}</p>`;
         timingContainer.innerHTML = '';
         stockContainer.innerHTML = '';
     });
