@@ -217,6 +217,7 @@ function switchTab(tabId) {
         renderTodayChecklist();
     } else if (tabId === 'safety') {
         renderSafetyPage();
+        runSafetyPageAudit(true);
     }
 }
 
@@ -1009,7 +1010,7 @@ function renderSafetyPage() {
     }
 }
 
-function runSafetyPageAudit() {
+function runSafetyPageAudit(keepAi = false) {
     const conflictsContainer = document.getElementById('page-conflicts-results');
     const timingContainer = document.getElementById('page-timing-results');
     const stockContainer = document.getElementById('page-stock-results');
@@ -1030,6 +1031,13 @@ function runSafetyPageAudit() {
         timingContainer.innerHTML = emptyMsg;
         stockContainer.innerHTML = emptyMsg;
         return;
+    }
+    
+    if (!keepAi) {
+        state.lastAiConflicts = [];
+        state.lastAiTiming = [];
+        state.lastAuditFingerprint = "";
+        saveState();
     }
     
     // Fetch local interactions rules
@@ -1061,8 +1069,8 @@ function runSafetyPageAudit() {
         
         renderPageAuditResults(matchedConflicts, savedAiConflicts, savedAiTiming);
         
-        if (!isFresh) {
-            state.lastAuditFingerprint = ""; // Force stale banner or reset
+        if (!isFresh && keepAi) {
+            state.lastAuditFingerprint = ""; // Reset since not fresh
             saveState();
         }
         renderSafetyPage();
