@@ -1048,9 +1048,9 @@ body {
 
 /* Days of Week Selector */
 .days-selector {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
     margin-top: 4px;
 }
 
@@ -1067,15 +1067,19 @@ body {
 }
 
 .day-checkbox span {
-    display: block;
-    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
     background-color: var(--bg-main);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 600;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: 700;
     color: var(--text-secondary);
     transition: var(--transition-fast);
+    margin: 0 auto;
 }
 
 .day-checkbox:hover span {
@@ -1503,4 +1507,210 @@ body {
     color: var(--text-muted);
     line-height: 1.55;
     margin: 0;
+}
+
+/* ==========================================
+   DARK THEME OVERRIDES
+   ========================================== */
+body.dark-theme {
+    --bg-main: #0a0c10;
+    --bg-card: #121620;
+    --bg-sidebar: #0d1017;
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-hover: rgba(255, 255, 255, 0.12);
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    /* Accents - Brighter for Dark Theme */
+    --accent-teal: #0dffd6;
+    --accent-teal-dark: #008f75;
+    --accent-teal-glow: rgba(13, 255, 214, 0.15);
+    
+    --accent-green: #10b981;
+    --accent-green-glow: rgba(16, 185, 129, 0.15);
+    
+    --accent-blue: #3b82f6;
+    --accent-blue-glow: rgba(59, 130, 246, 0.15);
+    
+    --accent-orange: #f59e0b;
+    --accent-orange-glow: rgba(245, 158, 11, 0.15);
+    
+    --accent-red: #ef4444;
+    --accent-red-glow: rgba(239, 68, 68, 0.15);
+
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --card-shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .logo-svg {
+    filter: drop-shadow(0 0 10px var(--accent-teal-glow));
+}
+
+body.dark-theme .checkbox-visual {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .checklist-item.checked {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+body.dark-theme .btn-primary {
+    color: var(--bg-main);
+    box-shadow: 0 4px 15px rgba(13, 255, 214, 0.15);
+}
+
+body.dark-theme .btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(13, 255, 214, 0.3);
+}
+
+body.dark-theme .btn-outline:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+body.dark-theme .modal-overlay {
+    background-color: rgba(6, 8, 12, 0.85);
+}
+
+body.dark-theme .modal {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-theme .form-group input, 
+body.dark-theme .form-group select {
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #ffffff;
+}
+
+body.dark-theme .form-group input:focus, 
+body.dark-theme .form-group select:focus {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-theme .day-checkbox span {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-theme .stock-status-bar {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ==========================================
+   THEME TOGGLE BUTTON
+   ========================================== */
+.theme-toggle-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--border-color);
+    border-color: var(--text-secondary);
+}
+
+/* ==========================================
+   MOBILE & RESPONSIVE LAYOUT
+   ========================================== */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 65px;
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.05);
+    z-index: 99;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    flex: 1;
+    padding: 8px 0;
+}
+
+.mobile-nav-item i {
+    font-size: 1.25rem;
+}
+
+.mobile-nav-item.active {
+    color: var(--accent-teal);
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    
+    .sidebar {
+        display: none; /* Hide desktop sidebar */
+    }
+    
+    .main-content {
+        padding: 1.5rem 1.25rem 80px 1.25rem; /* Space at bottom for nav bar */
+        height: auto;
+        overflow-y: visible;
+    }
+    
+    .app-header {
+        margin-bottom: 1.5rem;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .mobile-nav {
+        display: flex; /* Show mobile bottom nav bar */
+    }
+    
+    .theme-toggle-btn {
+        margin-right: 8px;
+    }
+    
+    .search-box {
+        width: 100% !important;
+    }
+    
+    .inventory-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .inventory-header div {
+        width: 100%;
+    }
+    
+    .inventory-header .btn {
+        width: 100%;
+    }
 }

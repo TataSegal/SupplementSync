@@ -47,6 +47,7 @@ const INITIAL_SUPPLEMENTS = [
 
 // App Init
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     loadState();
     updateDateDisplay();
     checkDailyReset();
@@ -170,14 +171,23 @@ function switchTab(tabId) {
     document.querySelectorAll('.nav-item').forEach(btn => {
         btn.classList.remove('active');
     });
+    document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+        btn.classList.remove('active');
+    });
     
     // Show selected tab & button
     const targetTab = document.getElementById(`tab-${tabId}`);
     const targetBtn = document.getElementById(`tab-${tabId}-btn`);
+    const targetMobileBtn = document.getElementById(`mobile-tab-${tabId}-btn`);
     
-    if (targetTab && targetBtn) {
+    if (targetTab) {
         targetTab.classList.add('active');
+    }
+    if (targetBtn) {
         targetBtn.classList.add('active');
+    }
+    if (targetMobileBtn) {
+        targetMobileBtn.classList.add('active');
     }
     
     // Specific tab loads
@@ -1150,4 +1160,47 @@ Respond ONLY with the raw JSON array.`;
         showToast("AI Safety Check failed: " + err.message, "error");
         renderAuditResults(currentLocalAuditResults);
     });
+}
+
+// ==========================================
+// THEME SWITCHER LOGIC (DAY/NIGHT)
+// ==========================================
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const themeIcon = document.getElementById('theme-icon');
+    
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        if (themeIcon) {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+    } else {
+        document.body.classList.remove('dark-theme');
+        if (themeIcon) {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+    }
+}
+
+function toggleTheme() {
+    const isDark = document.body.classList.toggle('dark-theme');
+    const themeIcon = document.getElementById('theme-icon');
+    
+    if (isDark) {
+        localStorage.setItem('theme', 'dark');
+        if (themeIcon) {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+        showToast("Switched to Night Mode", "info");
+    } else {
+        localStorage.setItem('theme', 'light');
+        if (themeIcon) {
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+        showToast("Switched to Day Mode", "info");
+    }
 }

@@ -12,17 +12,25 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="brand">
-                <div class="logo-icon">
-                    <i class="fa-solid fa-rotate"></i>
-                </div>
-                <h1>Sync</h1>
+                <svg class="logo-svg" width="38" height="38" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 10px var(--accent-teal-glow));">
+                    <circle cx="50" cy="50" r="42" stroke="url(#logo-grad)" stroke-width="8" stroke-dasharray="190 60" stroke-linecap="round"/>
+                    <rect x="44" y="24" width="12" height="52" rx="6" fill="url(#logo-grad)"/>
+                    <rect x="24" y="44" width="52" height="12" rx="6" fill="url(#logo-grad)"/>
+                    <defs>
+                        <linearGradient id="logo-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="var(--accent-teal-dark)"/>
+                            <stop offset="1" stop-color="var(--accent-teal)"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <h1 class="brand-title" style="font-weight: 800; letter-spacing: -0.5px; font-size: 1.6rem; color: var(--text-primary);">Sync</h1>
             </div>
             
             <nav class="nav-menu">
@@ -59,6 +67,9 @@
                     <h2 class="welcome-text">Your Wellness Journey</h2>
                 </div>
                 <div class="quick-stats-row">
+                    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode" style="margin-right: 15px;">
+                        <i class="fa-solid fa-moon" id="theme-icon"></i>
+                    </button>
                     <div class="header-stat">
                         <span class="stat-value" id="streak-count">0</span>
                         <span class="stat-label"><i class="fa-solid fa-fire fire-icon"></i> Day Streak</span>
@@ -322,31 +333,31 @@
                     <div class="days-selector">
                         <label class="day-checkbox">
                             <input type="checkbox" value="1" checked name="days">
-                            <span>Mon</span>
+                            <span>M</span>
                         </label>
                         <label class="day-checkbox">
                             <input type="checkbox" value="2" checked name="days">
-                            <span>Tue</span>
+                            <span>T</span>
                         </label>
                         <label class="day-checkbox">
                             <input type="checkbox" value="3" checked name="days">
-                            <span>Wed</span>
+                            <span>W</span>
                         </label>
                         <label class="day-checkbox">
                             <input type="checkbox" value="4" checked name="days">
-                            <span>Thu</span>
+                            <span>T</span>
                         </label>
                         <label class="day-checkbox">
                             <input type="checkbox" value="5" checked name="days">
-                            <span>Fri</span>
+                            <span>F</span>
                         </label>
                         <label class="day-checkbox">
                             <input type="checkbox" value="6" checked name="days">
-                            <span>Sat</span>
+                            <span>S</span>
                         </label>
                         <label class="day-checkbox">
                             <input type="checkbox" value="0" checked name="days">
-                            <span>Sun</span>
+                            <span>S</span>
                         </label>
                     </div>
                 </div>
@@ -446,7 +457,27 @@
         </div>
     </div>
 
+    <!-- Bottom Navigation for Mobile -->
+    <nav class="mobile-nav">
+        <button class="mobile-nav-item active" id="mobile-tab-today-btn" onclick="switchTab('today')">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Today</span>
+        </button>
+        <button class="mobile-nav-item" id="mobile-tab-supplements-btn" onclick="switchTab('supplements')">
+            <i class="fa-solid fa-pills"></i>
+            <span>Inventory</span>
+        </button>
+        <button class="mobile-nav-item" id="mobile-tab-analytics-btn" onclick="switchTab('analytics')">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span>Insights</span>
+        </button>
+        <button class="mobile-nav-item" id="mobile-tab-settings-btn" onclick="switchTab('settings')">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </button>
+    </nav>
+
     <!-- JavaScript Bundle -->
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
 </body>
 </html>
