@@ -970,6 +970,18 @@ function getCurrentInventoryFingerprint() {
     return state.supplements.map(s => s.name.toLowerCase()).sort().join('|');
 }
 
+function cleanAndParseJSON(text) {
+    let cleanText = text.trim();
+    // Remove markdown code block wraps if present
+    if (cleanText.startsWith("```")) {
+        // Remove leading ```json or ```
+        cleanText = cleanText.replace(/^```[a-zA-Z]*\s*/, "");
+        // Remove trailing ```
+        cleanText = cleanText.replace(/\s*```$/, "");
+    }
+    return JSON.parse(cleanText.trim());
+}
+
 function runSafetyPageAudit() {
     const conflictsContainer = document.getElementById('page-conflicts-results');
     const timingContainer = document.getElementById('page-timing-results');
@@ -979,8 +991,6 @@ function runSafetyPageAudit() {
     conflictsContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:25px; height:25px;"></div></div>`;
     timingContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:25px; height:25px;"></div></div>`;
     stockContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:25px; height:25px;"></div></div>`;
-    
-    document.getElementById('page-ai-consent-box').style.display = 'none';
     
     if (state.supplements.length === 0) {
         const emptyMsg = `
@@ -1024,32 +1034,11 @@ function runSafetyPageAudit() {
         
         renderPageAuditResults(matchedConflicts, savedAiConflicts, savedAiTiming);
         
-        // Show AI consent card if audit is NOT fresh and there are uncovered ingredients
         if (!isFresh) {
-            const allKnownIngredients = new Set();
-            rules.forEach(rule => rule.ingredients.forEach(ing => allKnownIngredients.add(ing.toLowerCase())));
-            
-            const uncoveredSupplements = state.supplements.filter(s => {
-                const nameLower = s.name.toLowerCase();
-                return !Array.from(allKnownIngredients).some(ing => nameLower.includes(ing));
-            });
-            
-            if (uncoveredSupplements.length > 0) {
-                const consentBox = document.getElementById('page-ai-consent-box');
-                const consentMessage = document.getElementById('page-ai-consent-message');
-                const listNames = uncoveredSupplements.map(s => `"${s.name}"`).join(', ');
-                
-                consentMessage.innerHTML = `Our local database does not contain pre-defined safety rules for: <strong>${listNames}</strong>. Run a deep AI compatibility check using the Gemini API.`;
-                consentBox.style.display = 'block';
-            } else {
-                document.getElementById('page-ai-consent-box').style.display = 'none';
-                state.lastAuditFingerprint = getCurrentInventoryFingerprint();
-                saveState();
-                renderSafetyPage();
-            }
-        } else {
-            document.getElementById('page-ai-consent-box').style.display = 'none';
+            state.lastAuditFingerprint = ""; // Force stale banner or reset
+            saveState();
         }
+        renderSafetyPage();
     })
     .catch(err => {
         console.error("Local safety audit load error:", err);
@@ -1074,7 +1063,9 @@ function renderPageAuditResults(localConflicts, aiConflicts = [], aiTiming = [])
             </h4>
     `;
     
-    if (localConflicts.length === 0) {
+    const safeLocalConflicts = Array.isArray(localConflicts) ? localConflicts : [];
+    
+    if (safeLocalConflicts.length === 0) {
         html += `
             <div class="safety-card success" style="padding: 10px 12px; font-size: 0.85rem; margin-top: 5px;">
                 <i class="fa-solid fa-circle-check safety-card-icon" style="font-size: 1.1rem; color: #10b981;"></i>
@@ -1085,7 +1076,7 @@ function renderPageAuditResults(localConflicts, aiConflicts = [], aiTiming = [])
             </div>
         `;
     } else {
-        localConflicts.forEach(conflict => {
+        safeLocalConflicts.forEach(conflict => {
             const isDanger = conflict.type === 'danger';
             const icon = isDanger ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
             const severityClass = isDanger ? 'danger' : 'warning';
@@ -1112,47 +1103,67 @@ function renderPageAuditResults(localConflicts, aiConflicts = [], aiTiming = [])
             </h4>
     `;
     
-    if (aiConflicts.length === 0) {
-        const currentFingerprint = getCurrentInventoryFingerprint();
-        if (state.lastAuditFingerprint === currentFingerprint && state.lastAiConflicts) {
-            // Already ran, but no warnings
-            html += `
-                <div class="safety-card success" style="padding: 10px 12px; font-size: 0.85rem; margin-top: 5px;">
-                    <i class="fa-solid fa-circle-check safety-card-icon" style="font-size: 1.1rem; color: #10b981;"></i>
-                    <div class="safety-card-content">
-                        <h5 style="font-size: 0.85rem; margin-bottom: 2px;">No AI Warnings Found</h5>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary);">Gemini AI conducted a deep safety analysis and found no additional interactions.</p>
-                    </div>
-                </div>
-            `;
-        } else {
-            // AI check has not been run for this configuration yet
-            html += `
-                <div style="padding: 16px; text-align: center; border: 1px dashed var(--border-color); border-radius: 8px; background-color: rgba(0,0,0,0.01); margin-top: 5px;">
-                    <i class="fa-solid fa-brain" style="font-size: 1.3rem; color: var(--text-muted); opacity: 0.6; margin-bottom: 6px; display: block;"></i>
-                    <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 8px;">Deeps warnings & lab interferences not analyzed yet.</span>
-                    <button class="btn btn-outline" onclick="runPageAISafetyCheck()" style="padding: 4px 12px; font-size: 0.75rem; border-radius: 6px;">
-                        <i class="fa-solid fa-bolt"></i> Run AI Check
-                    </button>
-                </div>
-            `;
-        }
+    if (aiConflicts === null) {
+        // AI is loading! Show a clean inline spinner
+        html += `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 1.5rem; gap:8px; border: 1px dashed var(--border-color); border-radius: 8px; background-color: rgba(0,0,0,0.01); margin-top: 5px;">
+                <div class="spinner" style="width:20px; height:20px;"></div>
+                <span style="font-size: 0.75rem; color: var(--accent-blue); font-weight:600; animation: pulse 1.5s infinite;">Gemini AI conducting analysis...</span>
+            </div>
+        `;
     } else {
-        aiConflicts.forEach(conflict => {
-            const isDanger = conflict.type === 'danger';
-            const icon = isDanger ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
-            const severityClass = isDanger ? 'danger' : 'warning';
-            
-            html += `
-                <div class="safety-card ${severityClass}" style="padding: 10px 12px; font-size: 0.85rem; margin-top: 5px;">
-                    <i class="fa-solid ${icon} safety-card-icon" style="font-size: 1.1rem;"></i>
-                    <div class="safety-card-content">
-                        <h5 style="font-size: 0.85rem; margin-bottom: 2px;">${conflict.type.toUpperCase()}: ${conflict.ingredients ? conflict.ingredients.join(' + ') : 'AI Warning'}</h5>
-                        <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.35;">${conflict.message}</p>
+        const safeAiConflicts = Array.isArray(aiConflicts) ? aiConflicts : [];
+        
+        if (safeAiConflicts.length === 0) {
+            const currentFingerprint = getCurrentInventoryFingerprint();
+            if (state.lastAuditFingerprint === currentFingerprint && state.lastAiConflicts && state.lastAiConflicts.length > 0) {
+                // Already ran and had results but safeAiConflicts parameter is empty? This is a fallback
+                html += `
+                    <div class="safety-card success" style="padding: 10px 12px; font-size: 0.85rem; margin-top: 5px;">
+                        <i class="fa-solid fa-circle-check safety-card-icon" style="font-size: 1.1rem; color: #10b981;"></i>
+                        <div class="safety-card-content">
+                            <h5 style="font-size: 0.85rem; margin-bottom: 2px;">No AI Warnings Found</h5>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">Gemini AI conducted a deep safety analysis and found no additional interactions.</p>
+                        </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            } else if (state.lastAuditFingerprint === currentFingerprint) {
+                // AI ran and found nothing
+                html += `
+                    <div class="safety-card success" style="padding: 10px 12px; font-size: 0.85rem; margin-top: 5px;">
+                        <i class="fa-solid fa-circle-check safety-card-icon" style="font-size: 1.1rem; color: #10b981;"></i>
+                        <div class="safety-card-content">
+                            <h5 style="font-size: 0.85rem; margin-bottom: 2px;">No AI Warnings Found</h5>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary);">Gemini AI conducted a deep safety analysis and found no additional interactions.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // AI check has not been run for this configuration yet
+                html += `
+                    <div style="padding: 16px; text-align: center; border: 1px dashed var(--border-color); border-radius: 8px; background-color: rgba(0,0,0,0.01); margin-top: 5px;">
+                        <i class="fa-solid fa-brain" style="font-size: 1.3rem; color: var(--text-muted); opacity: 0.6; margin-bottom: 6px; display: block;"></i>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); display: block;">Deep warnings & lab interferences not analyzed yet. Click 'Run Gemini AI Check' at the top to run.</span>
+                    </div>
+                `;
+            }
+        } else {
+            safeAiConflicts.forEach(conflict => {
+                const isDanger = conflict.type === 'danger';
+                const icon = isDanger ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
+                const severityClass = isDanger ? 'danger' : 'warning';
+                
+                html += `
+                    <div class="safety-card ${severityClass}" style="padding: 10px 12px; font-size: 0.85rem; margin-top: 5px;">
+                        <i class="fa-solid ${icon} safety-card-icon" style="font-size: 1.1rem;"></i>
+                        <div class="safety-card-content">
+                            <h5 style="font-size: 0.85rem; margin-bottom: 2px;">${conflict.type.toUpperCase()}: ${conflict.ingredients ? conflict.ingredients.join(' + ') : 'AI Warning'}</h5>
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.35;">${conflict.message}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
     }
     html += `</div>`;
     
@@ -1171,9 +1182,11 @@ function renderPageAuditResults(localConflicts, aiConflicts = [], aiTiming = [])
             <h4 style="margin-bottom: 12px; color: var(--text-primary); font-size: 0.95rem; font-weight: 700;"><i class="fa-solid fa-clock" style="color: var(--accent-teal);"></i> Optimal Intake Schedule</h4>
     `;
     
-    if (aiTiming.length > 0) {
+    const safeAiTiming = Array.isArray(aiTiming) ? aiTiming : [];
+    
+    if (safeAiTiming.length > 0) {
         timingHtml += `<ul style="padding-left: 18px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; line-height: 1.45;">`;
-        aiTiming.forEach(insight => {
+        safeAiTiming.forEach(insight => {
             timingHtml += `<li>${insight}</li>`;
         });
         timingHtml += `</ul>`;
@@ -1204,7 +1217,9 @@ function renderPageInventoryAnalytics() {
             <div style="display: flex; flex-direction: column; gap: 8px;">
     `;
     
-    state.supplements.forEach(supp => {
+    const supplementsList = Array.isArray(state.supplements) ? state.supplements : [];
+    
+    supplementsList.forEach(supp => {
         const stock = typeof supp.stock === 'number' ? supp.stock : 0;
         const limit = typeof supp.limit === 'number' ? supp.limit : 5;
         const isLow = stock <= limit;
@@ -1222,7 +1237,7 @@ function renderPageInventoryAnalytics() {
         `;
     });
     
-    const totalLogs = state.logs.length;
+    const totalLogs = Array.isArray(state.logs) ? state.logs.length : 0;
     html += `
             </div>
             <div style="padding: 10px; background-color: var(--accent-teal-glow); border-radius: 8px; border: 1px solid rgba(13, 148, 136, 0.15); margin-top: 5px;">
@@ -1244,14 +1259,15 @@ function runPageAISafetyCheck() {
     const conflictsContainer = document.getElementById('page-conflicts-results');
     const timingContainer = document.getElementById('page-timing-results');
     
-    // Clear and show AI spinner, keeping local conflicts intact if we already computed them
+    // Clear and show AI spinner inside timing AND conflicts Deep Audit section (by passing null as aiConflicts)
+    renderPageAuditResults(currentLocalAuditResults, null, []);
+    
     timingContainer.innerHTML = `
-        <div style="display:flex; justify-content:center; padding: 2rem;">
-            <p style="color: var(--accent-teal); font-weight:600; font-size:0.82rem; animation: pulse 1.5s infinite;">Gemini AI analyzing schedules...</p>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 2rem; gap:10px;">
+            <div class="spinner" style="width:25px; height:25px;"></div>
+            <p style="color: var(--accent-teal); font-weight:600; font-size:0.82rem; animation: pulse 1.5s infinite;">Gemini AI analyzing schedules & synergies...</p>
         </div>
     `;
-    
-    document.getElementById('page-ai-consent-box').style.display = 'none';
     
     const apiKey = state.geminiApiKey.trim();
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -1297,9 +1313,15 @@ Respond ONLY with the raw JSON object (no markdown wrapping, no backticks).`;
     .then(data => {
         const textResponse = data.candidates[0].content.parts[0].text;
         try {
-            const aiData = JSON.parse(textResponse.trim());
-            const aiConflicts = aiData.warnings_and_conflicts || aiData.conflicts || [];
-            const aiTiming = aiData.timing_insights || [];
+            const aiData = cleanAndParseJSON(textResponse);
+            
+            const aiConflicts = aiData.warnings_and_conflicts || 
+                                aiData.warningsAndConflicts || 
+                                aiData.conflicts || 
+                                aiData.warnings || [];
+            const aiTiming = aiData.timing_insights || 
+                             aiData.timingInsights || 
+                             aiData.timing || [];
             
             // Save to state so it persists
             state.lastAiConflicts = aiConflicts;
