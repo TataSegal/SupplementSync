@@ -1095,7 +1095,7 @@ function runSafetyPageAudit() {
     });
 }
 
-function renderPageAuditResults(localConflicts, aiConflicts = [], aiTiming = []) {
+function renderPageAuditResults(localConflicts, aiConflicts = [], aiTiming = [], aiError = null) {
     const conflictsContainer = document.getElementById('page-conflicts-results');
     const timingContainer = document.getElementById('page-timing-results');
     
@@ -1166,7 +1166,17 @@ function renderPageAuditResults(localConflicts, aiConflicts = [], aiTiming = [])
             </h4>
     `;
     
-    if (aiConflicts === null) {
+    if (aiError) {
+        html += `
+            <div style="padding: 12px; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 8px; background-color: rgba(239, 68, 68, 0.05); margin-top: 5px;">
+                <h5 style="color: #ef4444; font-size: 0.85rem; margin-bottom: 4px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> AI Check Failed
+                </h5>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">${aiError}</p>
+            </div>
+        `;
+    } else if (aiConflicts === null) {
+        // AI is loading! Show a clean inline spinner
         html += `
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 1.5rem; gap:8px; border: 1px dashed var(--border-color); border-radius: 8px; background-color: rgba(0,0,0,0.01); margin-top: 5px;">
                 <div class="spinner" style="width:20px; height:20px;"></div>
@@ -1391,13 +1401,13 @@ Respond ONLY with the raw JSON object (no markdown wrapping, no backticks).`;
         } catch (parseErr) {
             console.error("AI JSON parsing error:", textResponse, parseErr);
             showToast("Failed to parse AI response. Please try again.", "error");
-            renderPageAuditResults(state.lastLocalConflicts, [], []);
+            renderPageAuditResults(state.lastLocalConflicts, [], [], `Failed to parse JSON response: ${parseErr.message}. Response was: "${textResponse.substring(0, 150)}..."`);
         }
     })
     .catch(err => {
         console.error("AI Safety Check Error:", err);
         showToast("AI Safety Check failed: " + err.message, "error");
-        renderPageAuditResults(state.lastLocalConflicts, [], []);
+        renderPageAuditResults(state.lastLocalConflicts, [], [], `API Error: ${err.message}. Please verify your API Key and internet connection.`);
     });
 }
 
