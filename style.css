@@ -231,9 +231,16 @@ body {
 
 .header-progress-ring-container {
     position: relative;
-    width: 50px;
-    height: 50px;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
 .progress-percentage-center {
@@ -241,9 +248,11 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: var(--accent-teal);
+    letter-spacing: -0.5px;
+    line-height: 1;
 }
 
 .quick-stats-row {
