@@ -1195,13 +1195,11 @@ function toggleTheme() {
             themeIcon.classList.remove('fa-moon');
             themeIcon.classList.add('fa-sun');
         }
-        showToast("Switched to Night Mode", "info");
     } else {
         localStorage.setItem('theme', 'light');
         if (themeIcon) {
             themeIcon.classList.remove('fa-sun');
             themeIcon.classList.add('fa-moon');
         }
-        showToast("Switched to Day Mode", "info");
     }
 }
