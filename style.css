@@ -1098,6 +1098,58 @@ body.dark-theme .progress-ring-bg {
     color: var(--text-primary);
 }
 
+/* Safety Modal Interactive Tabs */
+.safety-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+    gap: 4px;
+}
+
+.safety-tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.safety-tab-btn:hover {
+    color: var(--accent-teal);
+}
+
+.safety-tab-btn.active {
+    color: var(--accent-teal);
+    border-bottom-color: var(--accent-teal);
+}
+
+.safety-tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.safety-tab-content.active {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.safety-audit-text-block {
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 10px;
+}
+
 /* Form Styles */
 .form-group {
     display: flex;

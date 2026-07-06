@@ -981,7 +981,6 @@ function checkSafetyAndInteractions() {
 }
 
 function runLocalAudit(rules) {
-    const resultsContainer = document.getElementById('safety-audit-results');
     const matchedConflicts = [];
     const activeSuppNames = state.supplements.map(s => s.name.toLowerCase());
     
@@ -1021,16 +1020,15 @@ function runLocalAudit(rules) {
     }
 }
 
-function renderAuditResults(conflicts) {
-    const resultsContainer = document.getElementById('safety-audit-results');
+function renderAuditResults(conflicts, aiTiming = []) {
+    const conflictsContainer = document.getElementById('safety-conflicts-results');
+    const timingContainer = document.getElementById('safety-timing-results');
     
-    let html = `
-        <h4 style="margin-bottom: 1.25rem; color: #ffffff;"><i class="fa-solid fa-stethoscope" style="color: var(--accent-teal);"></i> Audit Results</h4>
-    `;
-    
+    // 1. Render Conflicts (Tab 1)
+    let conflictsHtml = '';
     if (conflicts.length === 0) {
-        html += `
-            <div class="safety-card success">
+        conflictsHtml += `
+            <div class="safety-card success" style="margin-top: 10px;">
                 <i class="fa-solid fa-circle-check safety-card-icon"></i>
                 <div class="safety-card-content">
                     <h5>No Conflicts Found</h5>
@@ -1044,11 +1042,11 @@ function renderAuditResults(conflicts) {
             const icon = isDanger ? 'fa-triangle-exclamation' : 'fa-circle-exclamation';
             const severityClass = isDanger ? 'danger' : 'warning';
             
-            html += `
-                <div class="safety-card ${severityClass}">
+            conflictsHtml += `
+                <div class="safety-card ${severityClass}" style="margin-top: 10px;">
                     <i class="fa-solid ${icon} safety-card-icon"></i>
                     <div class="safety-card-content">
-                        <h5>${conflict.type}</h5>
+                        <h5>${conflict.type.toUpperCase()}: ${conflict.ingredients ? conflict.ingredients.join(' + ') : 'Interaction'}</h5>
                         <p>${conflict.message}</p>
                     </div>
                 </div>
@@ -1056,24 +1054,109 @@ function renderAuditResults(conflicts) {
         });
     }
     
-    // Add Medical Disclaimer
-    html += `
-        <div class="safety-disclaimer">
+    // Add Medical Disclaimer at the bottom of Tab 1
+    conflictsHtml += `
+        <div class="safety-disclaimer" style="margin-top: 1.5rem;">
             <p>
                 <strong>⚠️ Disclaimer:</strong> This safety audit is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a physician or healthcare provider before starting, stopping, or changing any supplement schedule.
             </p>
         </div>
     `;
     
-    resultsContainer.innerHTML = html;
+    conflictsContainer.innerHTML = conflictsHtml;
+    
+    // 2. Render Timing & Synergies (Tab 2)
+    let timingHtml = `
+        <div class="safety-audit-text-block" style="padding: 10px 0;">
+            <h4 style="margin-bottom: 12px; color: var(--text-primary);"><i class="fa-solid fa-clock" style="color: var(--accent-teal);"></i> Optimal Intake Schedule</h4>
+    `;
+    
+    if (aiTiming.length > 0) {
+        timingHtml += `<ul style="padding-left: 20px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">`;
+        aiTiming.forEach(insight => {
+            timingHtml += `<li>${insight}</li>`;
+        });
+        timingHtml += `</ul>`;
+    } else {
+        timingHtml += `
+            <ul style="padding-left: 20px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
+                <li><strong>Fat-Soluble Vitamins (D, E, A, K):</strong> Take with a fat-containing meal for optimal absorption.</li>
+                <li><strong>Magnesium:</strong> Best taken in the evening to promote muscle relaxation and improve sleep.</li>
+                <li><strong>B-Complex / Vitamin C:</strong> Best taken in the morning or early afternoon to boost energy levels.</li>
+                <li><strong>Mineral Separation:</strong> Do not take large doses of Calcium, Zinc, or Iron at the exact same time (separate by 2 hours).</li>
+            </ul>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; font-style: italic;">💡 Run the Gemini AI Check to generate custom, personalized timing and synergy insights for your specific supplements!</p>
+        `;
+    }
+    timingHtml += `</div>`;
+    timingContainer.innerHTML = timingHtml;
+    
+    // 3. Render Stock & Compliance (Tab 3)
+    renderInventoryAnalyticsInAudit();
+    
+    // Reset back to conflicts tab on open
+    switchSafetyTab('conflicts');
 }
 
-function closeSafetyModal() {
-    document.getElementById('safety-modal').classList.remove('active');
+function switchSafetyTab(tabName) {
+    document.querySelectorAll('.safety-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.safety-tab-content').forEach(content => content.classList.remove('active'));
+    
+    const targetBtn = document.getElementById(`safety-tab-btn-${tabName}`);
+    const targetContent = document.getElementById(`safety-tab-${tabName}`);
+    
+    if (targetBtn) targetBtn.classList.add('active');
+    if (targetContent) targetContent.classList.add('active');
 }
 
-function dismissAIConsent() {
-    document.getElementById('ai-consent-box').style.display = 'none';
+function renderInventoryAnalyticsInAudit() {
+    const stockContainer = document.getElementById('safety-stock-results');
+    if (!stockContainer) return;
+    
+    if (state.supplements.length === 0) {
+        stockContainer.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--text-muted);">No inventory items to analyze.</p>`;
+        return;
+    }
+    
+    let html = `
+        <div class="inventory-audit-report" style="padding: 10px 0;">
+            <h4 style="margin-bottom: 12px; color: var(--text-primary); font-size: 1rem;"><i class="fa-solid fa-boxes-stacked" style="color: var(--accent-teal);"></i> Stock Replenishment Status</h4>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+    `;
+    
+    state.supplements.forEach(supp => {
+        const stock = typeof supp.stock === 'number' ? supp.stock : 0;
+        const limit = typeof supp.limit === 'number' ? supp.limit : 5;
+        const isLow = stock <= limit;
+        
+        html += `
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background-color: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1rem; color: var(--accent-teal);">${getSupplementIcon(supp.type)}</span>
+                    <strong style="color: var(--text-primary); font-size: 0.85rem;">${supp.name}</strong>
+                </div>
+                <div style="text-align: right;">
+                    <span class="badge" style="font-weight: 700; padding: 2px 8px; font-size: 0.7rem; border-radius: 12px; color: #fff; background-color: ${isLow ? '#ef4444' : '#10b981'};">
+                        ${isLow ? 'Low Stock' : 'Healthy'}: ${stock}
+                    </span>
+                </div>
+            </div>
+        `;
+    });
+    
+    const totalLogs = state.logs.length;
+    html += `
+            </div>
+            <h4 style="margin-bottom: 12px; color: var(--text-primary); font-size: 1rem;"><i class="fa-solid fa-clipboard-list" style="color: var(--accent-teal);"></i> Intake Compliance</h4>
+            <div style="padding: 12px; background-color: var(--accent-teal-glow); border-radius: 8px; border: 1px solid rgba(13, 148, 136, 0.15);">
+                <span style="font-size: 0.8rem; color: var(--accent-teal); font-weight: 700; display: block; text-transform: uppercase; letter-spacing: 0.5px;">Total Logged Doses</span>
+                <span style="font-size: 1.4rem; font-weight: 800; color: var(--accent-teal);">${totalLogs} doses taken</span>
+                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Log your doses daily to build up compliance charts and insights.</p>
+            </div>
+        </div>
+    `;
+    
+    stockContainer.innerHTML = html;
 }
 
 function runAISafetyCheck() {
@@ -1082,13 +1165,22 @@ function runAISafetyCheck() {
         return;
     }
     
-    const resultsContainer = document.getElementById('safety-audit-results');
-    resultsContainer.innerHTML = `
+    const conflictsContainer = document.getElementById('safety-conflicts-results');
+    const timingContainer = document.getElementById('safety-timing-results');
+    
+    conflictsContainer.innerHTML = `
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 3rem; gap:16px;">
             <div class="spinner"></div>
             <p style="color: var(--accent-teal); font-weight:600; animation: pulse 1.5s infinite;">Gemini AI conducting safety audit...</p>
         </div>
     `;
+    
+    timingContainer.innerHTML = `
+        <div style="display:flex; justify-content:center; padding: 2rem;">
+            <p style="color: var(--text-muted);">Analyzing optimal schedules...</p>
+        </div>
+    `;
+    
     document.getElementById('ai-consent-box').style.display = 'none';
     
     const apiKey = state.geminiApiKey.trim();
@@ -1096,17 +1188,19 @@ function runAISafetyCheck() {
     
     const suppList = state.supplements.map(s => `- ${s.name} (${s.dosage || "no dosage specified"})`).join('\n');
     
-    const promptText = `Analyze this list of supplements for potential negative interactions, competitive absorption, dosage overlaps, or warnings. Consider synergistic benefits too.
+    const promptText = `Analyze this list of supplements for potential negative interactions, competitive absorption, dosage overlaps, warnings, scheduling time advice, and synergistic benefits.
 Supplements List:
 ${suppList}
 
-Format your response as a clean JSON array (no markdown wraps, no backticks) where each object has these keys:
-- "type": "warning" or "danger"
-- "message": A concise, clear explanation of the interaction and action-item advice.
-- "ingredients": An array of ingredients involved.
+You MUST return a JSON object with exactly these two keys:
+- "conflicts": Array of objects, each containing:
+    - "type": "warning" or "danger"
+    - "message": Concise explanation of interaction or hazard.
+    - "ingredients": Array of ingredients involved.
+- "timing_insights": Array of strings representing schedule optimization, best times of day, and synergies.
 
-If there are absolutely no interactions, return an empty array [].
-Respond ONLY with the raw JSON array.`;
+If there are no conflicts, return "conflicts": [].
+Respond ONLY with the raw JSON object (no markdown wrapping, no backticks).`;
 
     const requestBody = {
         contents: [
@@ -1133,7 +1227,9 @@ Respond ONLY with the raw JSON array.`;
     .then(data => {
         const textResponse = data.candidates[0].content.parts[0].text;
         try {
-            const aiConflicts = JSON.parse(textResponse.trim());
+            const aiData = JSON.parse(textResponse.trim());
+            const aiConflicts = aiData.conflicts || [];
+            const aiTiming = aiData.timing_insights || [];
             
             // Combine with local conflicts
             const combined = [...currentLocalAuditResults, ...aiConflicts];
@@ -1148,7 +1244,7 @@ Respond ONLY with the raw JSON array.`;
                 }
             });
             
-            renderAuditResults(unique);
+            renderAuditResults(unique, aiTiming);
             showToast("Gemini AI Safety Audit completed!", "success");
         } catch (parseErr) {
             console.error("AI JSON parsing error:", textResponse, parseErr);

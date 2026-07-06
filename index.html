@@ -12,7 +12,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css?v=16">
+    <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
     <div class="app-container">
@@ -442,17 +442,49 @@
 
     <!-- SAFETY AUDIT MODAL -->
     <div class="modal-overlay" id="safety-modal">
-        <div class="modal scanner-modal-content">
+        <div class="modal scanner-modal-content" style="max-height: 85vh; display: flex; flex-direction: column; width: 550px;">
             <div class="modal-header">
                 <h3><i class="fa-solid fa-shield-halved"></i> Supplement Safety Audit</h3>
                 <button class="close-btn" onclick="closeSafetyModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="modal-body" style="padding-top: 1rem;">
-                <div id="safety-audit-results">
-                    <!-- Results populated dynamically by JS -->
+            
+            <!-- Interactive Tabs -->
+            <div class="safety-tabs">
+                <button class="safety-tab-btn active" id="safety-tab-btn-conflicts" onclick="switchSafetyTab('conflicts')">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Conflicts
+                </button>
+                <button class="safety-tab-btn" id="safety-tab-btn-timing" onclick="switchSafetyTab('timing')">
+                    <i class="fa-solid fa-clock"></i> Schedule & Synergies
+                </button>
+                <button class="safety-tab-btn" id="safety-tab-btn-stock" onclick="switchSafetyTab('stock')">
+                    <i class="fa-solid fa-boxes-stacked"></i> Supply & Logs
+                </button>
+            </div>
+            
+            <div class="modal-body" style="padding-top: 0.5rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+                <!-- Tab 1: Conflicts -->
+                <div class="safety-tab-content active" id="safety-tab-conflicts">
+                    <div id="safety-conflicts-results">
+                        <!-- Populated dynamically by JS -->
+                    </div>
                 </div>
                 
-                <div class="ai-consent-card" id="ai-consent-box" style="display: none;">
+                <!-- Tab 2: Timing & Synergy -->
+                <div class="safety-tab-content" id="safety-tab-timing">
+                    <div id="safety-timing-results">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+                
+                <!-- Tab 3: Supply & Logs -->
+                <div class="safety-tab-content" id="safety-tab-stock">
+                    <div id="safety-stock-results">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+                
+                <!-- AI Consent Box -->
+                <div class="ai-consent-card" id="ai-consent-box" style="display: none; margin-top: 1.5rem; margin-bottom: 0.5rem;">
                     <h4><i class="fa-solid fa-brain"></i> Ask Gemini AI?</h4>
                     <p id="ai-consent-message">
                         Some supplements are missing from our local database. Would you like to run a secure AI compatibility check?
@@ -465,7 +497,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" style="margin-top: 1.5rem;">
+            <div class="modal-footer" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
                 <button type="button" class="btn btn-outline" onclick="closeSafetyModal()">Close</button>
             </div>
         </div>
@@ -492,6 +524,6 @@
     </nav>
 
     <!-- JavaScript Bundle -->
-    <script src="app.js?v=18"></script>
+    <script src="app.js?v=19"></script>
 </body>
 </html>
