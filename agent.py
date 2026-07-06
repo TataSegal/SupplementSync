@@ -1,7 +1,7 @@
 # Supplement Sync ADK Multi-Agent System Graph
 import os
 import yaml
-from google.adk.agents import LlmAgent, OrchestratorAgent
+from google.adk.agents import LlmAgent
 from tools.ocr_tool import ocr_tool
 from tools.interaction_db import interaction_db_tool
 from tools.reporting_tool import reporting_tool
@@ -50,12 +50,12 @@ def initialize_system():
     )
     
     # Orchestrator / Supervisor Agent ( Orchestrates specialist agent tools )
-    orchestrator = OrchestratorAgent(
+    orchestrator = LlmAgent(
         name="supplement_sync_orchestrator",
         model="gemini-2.5-flash",
         description="Supervisor agent delegating tasks to expert agents.",
         instruction=prompts['prompts']['orchestrator']['system_instruction'],
-        agents=[label_extractor, safety_auditor, inventory_analyst]
+        sub_agents=[label_extractor, safety_auditor, inventory_analyst]
     )
     
     return orchestrator
