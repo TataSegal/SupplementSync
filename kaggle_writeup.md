@@ -48,11 +48,21 @@ The application is structured as a client-side web application to reduce backend
 *   **Supplement Type Icons**: Custom icons (Pills, Capsules, Liquid, Powder, Syringe) map directly to formulations.
 
 ### 3. AI Agent Integration & Security Architecture
-*   **Label Extractor & Safety Agents**:
-    *   Direct `fetch` requests sent from the browser to the official Google Gemini API endpoint.
-    *   **Authentication**: Sent via the `x-goog-api-key` header rather than query string parameters (which can leak via browser history or proxy logs).
-    *   **Structured JSON Output**: Prompts enforce a clean JSON payload using `responseMimeType: "application/json"`.
-*   **Demo Mode fallback**: If no API key is provided, the app runs in **Demo Mode**, displaying the loader spinner before autofilling mock supplement data.
+The application integrates two specialized AI agents utilizing the Gemini API:
+
+*   **Agent 1: Label Extractor Agent (Vision-to-Structured-Data)**:
+    *   **Capability**: Processes base64-encoded image streams captured via camera or file uploads.
+    *   **System Instructions**: Acts as a medical scribe. It extracts three specific data points (`name`, `dosage`, `notes`) from the visual label.
+    *   **Structured Output**: Enforces structured JSON output via `responseMimeType: "application/json"`, populating the supplement forms automatically to eliminate manual entry friction.
+*   **Agent 2: Safety & Compatibility Audit Agent (Clinical Verification)**:
+    *   **Capability**: Analyzes the user's active cabinet list (triggered automatically when the cabinet's fingerprint changes to avoid stale checks).
+    *   **System Instructions**: Acts as a clinical pharmacist. It scans the supplement cabinet for three main risk profiles:
+        1.  *Incompatibility & Interactions*: Competitions for absorption (e.g., Calcium blocking Iron) or negative synergies (e.g., high-dose Omega-3 with Curcumin thinning blood).
+        2.  *Lab Test Interferences*: Identifies substances like Biotin interfering with thyroid or troponin panel readings.
+        3.  *Cumulative Overdoses*: Detects overlapping active ingredients across different supplement brands.
+    *   **Structured Output**: Enforces structured JSON containing `warnings_and_conflicts` (categorized as `warning` or `danger` alerts) and `timing_insights` (optimal schedule separation).
+*   **Authentication**: Both agents send direct browser-to-Google `fetch` requests utilizing the `x-goog-api-key` HTTP header rather than query string parameters.
+*   **Demo Mode fallback**: If no API key is provided, the app runs in **Demo Mode**, bypassing active AI requests and displaying simulated loading before auto-populating mock supplement data.
 
 ### 4. Production Recommendation (Backend Proxy)
 For a commercial, production-grade deployment, the architecture should be refactored to introduce a **secure backend proxy/gateway** (e.g., hosted on Google Cloud Run or Cloud Functions). The backend proxy would:
