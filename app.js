@@ -8,7 +8,8 @@ let state = {
     logs: [], // Array of { date: 'YYYY-MM-DD', id: 'supp-id' }
     streak: 0,
     lastActiveDate: null,
-    geminiApiKey: ""
+    geminiApiKey: "",
+    lastAuditFingerprint: ""
 };
 
 // Mock/Initial Data if empty
@@ -90,6 +91,9 @@ function loadState() {
             state = JSON.parse(storedState);
             if (state.geminiApiKey === undefined) {
                 state.geminiApiKey = "";
+            }
+            if (state.lastAuditFingerprint === undefined) {
+                state.lastAuditFingerprint = "";
             }
         } catch (e) {
             console.error("Error parsing stored state, resetting.", e);
@@ -197,6 +201,8 @@ function switchTab(tabId) {
         renderInventory();
     } else if (tabId === 'today') {
         renderTodayChecklist();
+    } else if (tabId === 'safety') {
+        renderSafetyPage();
     }
 }
 
@@ -946,93 +952,98 @@ function autofillForm(name, dosage, notes) {
 // ==========================================
 let currentLocalAuditResults = [];
 
-function checkSafetyAndInteractions() {
-    const modal = document.getElementById('safety-modal');
-    modal.classList.add('active');
+function runSafetyPageAudit() {
+    const conflictsContainer = document.getElementById('page-conflicts-results');
+    const timingContainer = document.getElementById('page-timing-results');
+    const stockContainer = document.getElementById('page-stock-results');
     
-    const resultsContainer = document.getElementById('safety-audit-results');
-    resultsContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:30px; height:30px;"></div></div>`;
+    // Show spinners
+    conflictsContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:25px; height:25px;"></div></div>`;
+    timingContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:25px; height:25px;"></div></div>`;
+    stockContainer.innerHTML = `<div style="display:flex; justify-content:center; padding: 2rem;"><div class="spinner" style="width:25px; height:25px;"></div></div>`;
     
-    document.getElementById('ai-consent-box').style.display = 'none';
+    document.getElementById('page-ai-consent-box').style.display = 'none';
     
     if (state.supplements.length === 0) {
-        resultsContainer.innerHTML = `
+        const emptyMsg = `
             <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                <i class="fa-solid fa-clipboard-question" style="font-size: 2.5rem; opacity: 0.5; margin-bottom: 12px; display: block;"></i>
-                <p>Your inventory is empty. Add supplements first to run a safety audit.</p>
+                <i class="fa-solid fa-clipboard-question" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px; display: block;"></i>
+                <p style="font-size: 0.85rem;">Cabinet empty. Add supplements first.</p>
             </div>
         `;
+        conflictsContainer.innerHTML = emptyMsg;
+        timingContainer.innerHTML = emptyMsg;
+        stockContainer.innerHTML = emptyMsg;
         return;
     }
     
-    // Fetch local interactions
+    // Fetch local interactions rules
     fetch('interactions.json')
     .then(response => {
         if (!response.ok) throw new Error("Could not load local safety database");
         return response.json();
     })
     .then(rules => {
-        runLocalAudit(rules);
+        const matchedConflicts = [];
+        const activeSuppNames = state.supplements.map(s => s.name.toLowerCase());
+        
+        rules.forEach(rule => {
+            const matchingIngredients = rule.ingredients.filter(ing => {
+                return activeSuppNames.some(suppName => suppName.includes(ing.toLowerCase()));
+            });
+            if (matchingIngredients.length === rule.ingredients.length) {
+                matchedConflicts.push(rule);
+            }
+        });
+        
+        currentLocalAuditResults = matchedConflicts;
+        renderPageAuditResults(matchedConflicts);
+        
+        // Check for uncovered supplements
+        const allKnownIngredients = new Set();
+        rules.forEach(rule => rule.ingredients.forEach(ing => allKnownIngredients.add(ing.toLowerCase())));
+        
+        const uncoveredSupplements = state.supplements.filter(s => {
+            const nameLower = s.name.toLowerCase();
+            return !Array.from(allKnownIngredients).some(ing => nameLower.includes(ing));
+        });
+        
+        if (uncoveredSupplements.length > 0) {
+            const consentBox = document.getElementById('page-ai-consent-box');
+            const consentMessage = document.getElementById('page-ai-consent-message');
+            const listNames = uncoveredSupplements.map(s => `"${s.name}"`).join(', ');
+            
+            consentMessage.innerHTML = `Our local database does not contain pre-defined safety rules for: <strong>${listNames}</strong>. Run a secure AI check via Gemini API to query potential interactions, absorption competition, and dosage safety.`;
+            consentBox.style.display = 'block';
+        } else {
+            document.getElementById('page-ai-consent-box').style.display = 'none';
+            // Audit is fully up to date with local db
+            state.lastAuditFingerprint = getCurrentInventoryFingerprint();
+            saveState();
+            renderSafetyPage();
+        }
     })
     .catch(err => {
         console.error("Local safety audit load error:", err);
-        resultsContainer.innerHTML = `<p style="color: #ef4444; text-align:center;">Failed to load safety database.</p>`;
+        conflictsContainer.innerHTML = `<p style="color: #ef4444; text-align:center; font-size: 0.85rem;">Failed to load safety database.</p>`;
+        timingContainer.innerHTML = '';
+        stockContainer.innerHTML = '';
     });
 }
 
-function runLocalAudit(rules) {
-    const matchedConflicts = [];
-    const activeSuppNames = state.supplements.map(s => s.name.toLowerCase());
+function renderPageAuditResults(conflicts, aiTiming = []) {
+    const conflictsContainer = document.getElementById('page-conflicts-results');
+    const timingContainer = document.getElementById('page-timing-results');
     
-    // Check conflicts
-    rules.forEach(rule => {
-        const matchingIngredients = rule.ingredients.filter(ing => {
-            return activeSuppNames.some(suppName => suppName.includes(ing.toLowerCase()));
-        });
-        
-        // If all ingredients of the conflict rule are present, it's a conflict
-        if (matchingIngredients.length === rule.ingredients.length) {
-            matchedConflicts.push(rule);
-        }
-    });
-    
-    currentLocalAuditResults = matchedConflicts;
-    renderAuditResults(matchedConflicts);
-    
-    // Check if there are active supplements not covered by the local interactions database
-    const allKnownIngredients = new Set();
-    rules.forEach(rule => rule.ingredients.forEach(ing => allKnownIngredients.add(ing.toLowerCase())));
-    
-    const uncoveredSupplements = state.supplements.filter(s => {
-        const nameLower = s.name.toLowerCase();
-        return !Array.from(allKnownIngredients).some(ing => nameLower.includes(ing));
-    });
-    
-    if (uncoveredSupplements.length > 0) {
-        const consentBox = document.getElementById('ai-consent-box');
-        const consentMessage = document.getElementById('ai-consent-message');
-        const listNames = uncoveredSupplements.map(s => `"${s.name}"`).join(', ');
-        
-        consentMessage.innerHTML = `Our local database does not contain safety rules for: <strong>${listNames}</strong>. Would you like to run a deep AI compatibility audit using the Gemini API?`;
-        consentBox.style.display = 'block';
-    } else {
-        document.getElementById('ai-consent-box').style.display = 'none';
-    }
-}
-
-function renderAuditResults(conflicts, aiTiming = []) {
-    const conflictsContainer = document.getElementById('safety-conflicts-results');
-    const timingContainer = document.getElementById('safety-timing-results');
-    
-    // 1. Render Conflicts (Tab 1)
+    // 1. Render Conflicts
     let conflictsHtml = '';
     if (conflicts.length === 0) {
         conflictsHtml += `
-            <div class="safety-card success" style="margin-top: 10px;">
+            <div class="safety-card success">
                 <i class="fa-solid fa-circle-check safety-card-icon"></i>
                 <div class="safety-card-content">
                     <h5>No Conflicts Found</h5>
-                    <p>All supplements checked are compatible. Keep it up!</p>
+                    <p>All supplements in your cabinet are compatible. Keep it up!</p>
                 </div>
             </div>
         `;
@@ -1043,7 +1054,7 @@ function renderAuditResults(conflicts, aiTiming = []) {
             const severityClass = isDanger ? 'danger' : 'warning';
             
             conflictsHtml += `
-                <div class="safety-card ${severityClass}" style="margin-top: 10px;">
+                <div class="safety-card ${severityClass}">
                     <i class="fa-solid ${icon} safety-card-icon"></i>
                     <div class="safety-card-content">
                         <h5>${conflict.type.toUpperCase()}: ${conflict.ingredients ? conflict.ingredients.join(' + ') : 'Interaction'}</h5>
@@ -1054,74 +1065,47 @@ function renderAuditResults(conflicts, aiTiming = []) {
         });
     }
     
-    // Add Medical Disclaimer at the bottom of Tab 1
     conflictsHtml += `
-        <div class="safety-disclaimer" style="margin-top: 1.5rem;">
-            <p>
-                <strong>⚠️ Disclaimer:</strong> This safety audit is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult a physician or healthcare provider before starting, stopping, or changing any supplement schedule.
+        <div class="safety-disclaimer" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 10px;">
+            <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.3;">
+                <strong>⚠️ Disclaimer:</strong> This safety report is for informational purposes only. Consult a physician before modifying schedule.
             </p>
         </div>
     `;
-    
     conflictsContainer.innerHTML = conflictsHtml;
     
-    // 2. Render Timing & Synergies (Tab 2)
-    let timingHtml = `
-        <div class="safety-audit-text-block" style="padding: 10px 0;">
-            <h4 style="margin-bottom: 12px; color: var(--text-primary);"><i class="fa-solid fa-clock" style="color: var(--accent-teal);"></i> Optimal Intake Schedule</h4>
-    `;
-    
+    // 2. Render Timing & Synergies
+    let timingHtml = '';
     if (aiTiming.length > 0) {
-        timingHtml += `<ul style="padding-left: 20px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">`;
+        timingHtml += `<ul style="padding-left: 18px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; line-height: 1.4;">`;
         aiTiming.forEach(insight => {
             timingHtml += `<li>${insight}</li>`;
         });
         timingHtml += `</ul>`;
     } else {
         timingHtml += `
-            <ul style="padding-left: 20px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem;">
+            <ul style="padding-left: 18px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; line-height: 1.4;">
                 <li><strong>Fat-Soluble Vitamins (D, E, A, K):</strong> Take with a fat-containing meal for optimal absorption.</li>
                 <li><strong>Magnesium:</strong> Best taken in the evening to promote muscle relaxation and improve sleep.</li>
                 <li><strong>B-Complex / Vitamin C:</strong> Best taken in the morning or early afternoon to boost energy levels.</li>
                 <li><strong>Mineral Separation:</strong> Do not take large doses of Calcium, Zinc, or Iron at the exact same time (separate by 2 hours).</li>
             </ul>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; font-style: italic;">💡 Run the Gemini AI Check to generate custom, personalized timing and synergy insights for your specific supplements!</p>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 12px; font-style: italic;">💡 Run the Gemini AI Check to generate custom, personalized timing and synergy insights for your specific supplements!</p>
         `;
     }
-    timingHtml += `</div>`;
     timingContainer.innerHTML = timingHtml;
     
-    // 3. Render Stock & Compliance (Tab 3)
-    renderInventoryAnalyticsInAudit();
-    
-    // Reset back to conflicts tab on open
-    switchSafetyTab('conflicts');
+    // 3. Render Stock & Logs
+    renderPageInventoryAnalytics();
 }
 
-function switchSafetyTab(tabName) {
-    document.querySelectorAll('.safety-tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.safety-tab-content').forEach(content => content.classList.remove('active'));
-    
-    const targetBtn = document.getElementById(`safety-tab-btn-${tabName}`);
-    const targetContent = document.getElementById(`safety-tab-${tabName}`);
-    
-    if (targetBtn) targetBtn.classList.add('active');
-    if (targetContent) targetContent.classList.add('active');
-}
-
-function renderInventoryAnalyticsInAudit() {
-    const stockContainer = document.getElementById('safety-stock-results');
+function renderPageInventoryAnalytics() {
+    const stockContainer = document.getElementById('page-stock-results');
     if (!stockContainer) return;
     
-    if (state.supplements.length === 0) {
-        stockContainer.innerHTML = `<p style="text-align:center; padding: 2rem; color: var(--text-muted);">No inventory items to analyze.</p>`;
-        return;
-    }
-    
     let html = `
-        <div class="inventory-audit-report" style="padding: 10px 0;">
-            <h4 style="margin-bottom: 12px; color: var(--text-primary); font-size: 1rem;"><i class="fa-solid fa-boxes-stacked" style="color: var(--accent-teal);"></i> Stock Replenishment Status</h4>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+        <div class="inventory-audit-report" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 8px;">
     `;
     
     state.supplements.forEach(supp => {
@@ -1130,16 +1114,14 @@ function renderInventoryAnalyticsInAudit() {
         const isLow = stock <= limit;
         
         html += `
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background-color: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 1rem; color: var(--accent-teal);">${getSupplementIcon(supp.type)}</span>
-                    <strong style="color: var(--text-primary); font-size: 0.85rem;">${supp.name}</strong>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background-color: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+                    <span style="font-size: 0.9rem; flex-shrink: 0;">${getSupplementIcon(supp.type)}</span>
+                    <strong style="color: var(--text-primary); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${supp.name}</strong>
                 </div>
-                <div style="text-align: right;">
-                    <span class="badge" style="font-weight: 700; padding: 2px 8px; font-size: 0.7rem; border-radius: 12px; color: #fff; background-color: ${isLow ? '#ef4444' : '#10b981'};">
-                        ${isLow ? 'Low Stock' : 'Healthy'}: ${stock}
-                    </span>
-                </div>
+                <span class="badge" style="font-weight: 700; padding: 2px 8px; font-size: 0.65rem; border-radius: 12px; color: #fff; background-color: ${isLow ? '#ef4444' : '#10b981'}; flex-shrink: 0;">
+                    ${isLow ? 'Low Stock' : 'Healthy'}: ${stock}
+                </span>
             </div>
         `;
     });
@@ -1147,41 +1129,39 @@ function renderInventoryAnalyticsInAudit() {
     const totalLogs = state.logs.length;
     html += `
             </div>
-            <h4 style="margin-bottom: 12px; color: var(--text-primary); font-size: 1rem;"><i class="fa-solid fa-clipboard-list" style="color: var(--accent-teal);"></i> Intake Compliance</h4>
-            <div style="padding: 12px; background-color: var(--accent-teal-glow); border-radius: 8px; border: 1px solid rgba(13, 148, 136, 0.15);">
-                <span style="font-size: 0.8rem; color: var(--accent-teal); font-weight: 700; display: block; text-transform: uppercase; letter-spacing: 0.5px;">Total Logged Doses</span>
-                <span style="font-size: 1.4rem; font-weight: 800; color: var(--accent-teal);">${totalLogs} doses taken</span>
-                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Log your doses daily to build up compliance charts and insights.</p>
+            <div style="padding: 10px; background-color: var(--accent-teal-glow); border-radius: 8px; border: 1px solid rgba(13, 148, 136, 0.15); margin-top: 5px;">
+                <span style="font-size: 0.75rem; color: var(--accent-teal); font-weight: 700; display: block; text-transform: uppercase;">Total Intake Records</span>
+                <span style="font-size: 1.25rem; font-weight: 800; color: var(--accent-teal);">${totalLogs} doses taken</span>
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Log your doses daily to build up compliance charts.</p>
             </div>
         </div>
     `;
-    
     stockContainer.innerHTML = html;
 }
 
-function runAISafetyCheck() {
+function runPageAISafetyCheck() {
     if (!state.geminiApiKey || state.geminiApiKey.trim() === "") {
         showToast("Please enter a Gemini API Key in Settings to run the AI check.", "warning");
         return;
     }
     
-    const conflictsContainer = document.getElementById('safety-conflicts-results');
-    const timingContainer = document.getElementById('safety-timing-results');
+    const conflictsContainer = document.getElementById('page-conflicts-results');
+    const timingContainer = document.getElementById('page-timing-results');
     
     conflictsContainer.innerHTML = `
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 3rem; gap:16px;">
-            <div class="spinner"></div>
-            <p style="color: var(--accent-teal); font-weight:600; animation: pulse 1.5s infinite;">Gemini AI conducting safety audit...</p>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 2rem; gap:10px;">
+            <div class="spinner" style="width:25px; height:25px;"></div>
+            <p style="color: var(--accent-teal); font-weight:600; font-size:0.85rem; animation: pulse 1.5s infinite;">AI conducting safety audit...</p>
         </div>
     `;
     
     timingContainer.innerHTML = `
         <div style="display:flex; justify-content:center; padding: 2rem;">
-            <p style="color: var(--text-muted);">Analyzing optimal schedules...</p>
+            <p style="color: var(--text-muted); font-size:0.85rem;">Analyzing schedules...</p>
         </div>
     `;
     
-    document.getElementById('ai-consent-box').style.display = 'none';
+    document.getElementById('page-ai-consent-box').style.display = 'none';
     
     const apiKey = state.geminiApiKey.trim();
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -1231,10 +1211,7 @@ Respond ONLY with the raw JSON object (no markdown wrapping, no backticks).`;
             const aiConflicts = aiData.conflicts || [];
             const aiTiming = aiData.timing_insights || [];
             
-            // Combine with local conflicts
             const combined = [...currentLocalAuditResults, ...aiConflicts];
-            
-            // Deduplicate conflicts by message
             const unique = [];
             const seen = new Set();
             combined.forEach(c => {
@@ -1244,19 +1221,28 @@ Respond ONLY with the raw JSON object (no markdown wrapping, no backticks).`;
                 }
             });
             
-            renderAuditResults(unique, aiTiming);
+            renderPageAuditResults(unique, aiTiming);
             showToast("Gemini AI Safety Audit completed!", "success");
+            
+            // Mark audit as completed and fresh
+            state.lastAuditFingerprint = getCurrentInventoryFingerprint();
+            saveState();
+            renderSafetyPage();
         } catch (parseErr) {
             console.error("AI JSON parsing error:", textResponse, parseErr);
             showToast("Failed to parse AI response. Please try again.", "error");
-            renderAuditResults(currentLocalAuditResults);
+            renderPageAuditResults(currentLocalAuditResults);
         }
     })
     .catch(err => {
         console.error("AI Safety Check Error:", err);
         showToast("AI Safety Check failed: " + err.message, "error");
-        renderAuditResults(currentLocalAuditResults);
+        renderPageAuditResults(currentLocalAuditResults);
     });
+}
+
+function dismissPageAIConsent() {
+    document.getElementById('page-ai-consent-box').style.display = 'none';
 }
 
 // ==========================================
