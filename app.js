@@ -894,7 +894,7 @@ function processImage(base64Data) {
 
 function callGeminiAPI(base64Data) {
     const apiKey = state.geminiApiKey.trim();
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
     
     const promptText = `Analyze this supplement or vitamin label photo. Extract the following details and return ONLY a JSON object (no markdown, no backticks) with the keys:
 - "name": The clear brand and name of the supplement (e.g. "Nordic Naturals Omega-3").
@@ -931,7 +931,8 @@ If a detail cannot be found, return an empty string for that field. Do not inclu
     fetch(endpoint, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
         },
         body: JSON.stringify(requestBody)
     })
@@ -1344,7 +1345,7 @@ function runPageAISafetyCheck() {
     `;
     
     const apiKey = state.geminiApiKey.trim();
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`;
     
     const suppList = state.supplements.map(s => `- ${s.name} (${s.dosage || "no dosage specified"})`).join('\n');
     
@@ -1376,7 +1377,8 @@ Respond ONLY with the raw JSON object (no markdown wrapping, no backticks).`;
     fetch(endpoint, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey
         },
         body: JSON.stringify(requestBody)
     })

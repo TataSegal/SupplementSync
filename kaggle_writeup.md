@@ -42,17 +42,29 @@ The application is structured as a **Zero-Backend Serverless Client-Side App** t
 *   **Compact Circular Progress Widget**: An Apple Watch-like activity ring with a pulsing energy/vitality icon centered inside, displaying progress percentage and intake ratios side-by-side in the header.
 *   **Responsive Desktop/Mobile Synchronization**: Shows a clean dashboard sidebar on wide screens and transitions to a bottom navigation bar on mobile viewports (< 768px).
 
-### 2. State Management & Local Memory
-*   **Web Storage (LocalStorage)**: State (supplement catalog, schedules, intake logs, streaks, and API credentials) is saved locally in the browser's `localStorage` to guarantee 100% offline privacy.
+### 2. State Management & Local Storage
+*   **Persistent Web Storage (localStorage)**: User state (supplement catalog, schedules, intake logs, streaks, and API credentials) is saved locally in the browser's persistent `localStorage` to guarantee offline capability and protect user privacy from server leaks.
 *   **Smart Name Truncation**: Supplement names are intelligently shortened on the main checklist cards while retaining their full labels in detail modals.
 *   **Supplement Type Icons**: Custom icons (Pills, Capsules, Liquid, Powder, Syringe) map directly to formulations.
 
-### 3. AI Agent Integration (Gemini API)
-*   **Label Extractor Agent**:
-    *   Direct `fetch` requests sent to the Gemini API (`gemini-2.5-flash:generateContent`).
-    *   **Secure API Key Storage**: Key is entered in Settings and saved locally in `localStorage`—never sent to third-party servers.
+### 3. AI Agent Integration & Security Architecture
+*   **Label Extractor & Safety Agents**:
+    *   Direct `fetch` requests sent from the browser to the official Google Gemini API endpoint.
+    *   **Authentication**: Transmitted securely using the Google-recommended `x-goog-api-key` HTTP header rather than query string parameters (which can leak via browser history or proxy logs).
     *   **Structured JSON Output**: Prompts enforce a clean JSON payload using `responseMimeType: "application/json"`.
 *   **Demo Mode fallback**: If no API key is provided, the app runs in **Demo Mode**, displaying the loader spinner before autofilling mock supplement data.
+
+---
+
+## 🔒 Security & Production Best Practices
+> [!IMPORTANT]
+> **Prototype Design Considerations**:
+> Keeping the app 100% serverless and client-side allows free hosting on GitHub Pages and isolates personal health logs to the user's browser. However, storing API keys in `localStorage` and making client-side API requests exposes the keys to client-side risks (such as XSS attacks or physical device/profile compromise), violating OWASP production guidelines.
+> 
+> **Production Recommendation**:
+> For a commercial, production-grade deployment, the architecture should be refactored to introduce a **secure backend proxy/gateway** (e.g., hosted on Google Cloud Run or Cloud Functions). The backend proxy would:
+> 1. Store the Gemini API key securely in server-side environment variables or Secret Manager.
+> 2. Act as an intermediary endpoint, receiving requests from the client, appending the API key, and forwarding them to Google's API, keeping the secret key completely hidden from the client side.
 
 ---
 
