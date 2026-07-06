@@ -982,6 +982,33 @@ function cleanAndParseJSON(text) {
     return JSON.parse(cleanText.trim());
 }
 
+function renderSafetyPage() {
+    // 1. Render analyzed supplements list tags under #safety-analyzing-list
+    const listContainer = document.getElementById('safety-analyzing-list');
+    if (listContainer) {
+        if (state.supplements.length === 0) {
+            listContainer.innerHTML = `<span style="color: var(--text-muted); font-size: 0.85rem;">Your cabinet is empty. Add supplements in My Inventory first.</span>`;
+        } else {
+            listContainer.innerHTML = state.supplements.map(s => `
+                <span class="badge" style="padding: 6px 12px; font-size: 0.82rem; background-color: var(--bg-main); border: 1px solid var(--border-color); border-radius: 16px; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                    ${getSupplementIcon(s.type)} ${s.name}
+                </span>
+            `).join('');
+        }
+    }
+    
+    // 2. Check if audit is stale (stale warning banner)
+    const currentFingerprint = getCurrentInventoryFingerprint();
+    const staleBanner = document.getElementById('safety-stale-banner');
+    if (staleBanner) {
+        if (state.lastAuditFingerprint && state.lastAuditFingerprint !== currentFingerprint && state.supplements.length > 0) {
+            staleBanner.style.display = 'flex';
+        } else {
+            staleBanner.style.display = 'none';
+        }
+    }
+}
+
 function runSafetyPageAudit() {
     const conflictsContainer = document.getElementById('page-conflicts-results');
     const timingContainer = document.getElementById('page-timing-results');
