@@ -1032,6 +1032,16 @@ function renderSafetyPage() {
             staleBanner.style.display = 'none';
         }
     }
+    
+    // 3. Check if API key is missing
+    const noKeyBanner = document.getElementById('safety-no-key-banner');
+    if (noKeyBanner) {
+        if (!state.geminiApiKey || state.geminiApiKey.trim() === "") {
+            noKeyBanner.style.display = 'flex';
+        } else {
+            noKeyBanner.style.display = 'none';
+        }
+    }
 }
 
 function runSafetyPageAudit() {
