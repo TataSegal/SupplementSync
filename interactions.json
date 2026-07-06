@@ -1,0 +1,27 @@
+[
+  {
+    "ingredients": ["calcium", "iron"],
+    "type": "warning",
+    "message": "Calcium inhibits the absorption of Iron. It is recommended to separate their intake by at least 2 hours."
+  },
+  {
+    "ingredients": ["zinc", "copper"],
+    "type": "warning",
+    "message": "High doses of Zinc compete with Copper absorption, which may lead to Copper deficiency. Consider taking them at different times."
+  },
+  {
+    "ingredients": ["vitamin k", "warfarin"],
+    "type": "danger",
+    "message": "Vitamin K conflicts with anticoagulant medications (blood thinners like Warfarin) by promoting clotting. Consult your physician."
+  },
+  {
+    "ingredients": ["melatonin", "caffeine"],
+    "type": "warning",
+    "message": "Caffeine counteracts the sleep-inducing effects of Melatonin. Avoid caffeine close to taking Melatonin."
+  },
+  {
+    "ingredients": ["green tea", "iron"],
+    "type": "warning",
+    "message": "Green tea extract (EGCG) can bind to Iron, significantly reducing its absorption. Take them at different times of the day."
+  }
+]
