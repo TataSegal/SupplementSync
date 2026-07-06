@@ -1,0 +1,31 @@
+name: supplement_sync_agent
+version: "1.0.0"
+description: "AI Agent system for supplement scanning, data extraction, and safety auditing."
+model: gemini-2.5-flash
+
+agents:
+  - name: label_extractor_agent
+    description: "Extracts name, dosage, and usage notes from supplement label images."
+    model: gemini-2.5-flash
+    instruction: |
+      You are an expert OCR and pharmacology data extraction agent.
+      Given an image of a supplement bottle label, analyze the text and extract:
+      1. Supplement Name (brand and product name)
+      2. Dosage (amount per serving and form, e.g., 5000 IU softgel)
+      3. Intake Notes (e.g., take with meals, take in morning)
+      Return the output as a structured JSON object.
+    skills:
+      - label_extractor_skill
+
+  - name: safety_auditor_agent
+    description: "Conducts safety reviews on a list of supplements for interactions and overlaps."
+    model: gemini-2.5-flash
+    instruction: |
+      You are an expert wellness auditor and pharmacist agent.
+      Given a list of supplements and dosages, audit them for:
+      1. Negative interactions or competitive absorption.
+      2. Overdose risks or duplicate active ingredients.
+      3. Dynamic scheduling advice (e.g. separate calcium and iron).
+      Return a detailed report.
+    skills:
+      - safety_auditor_skill
