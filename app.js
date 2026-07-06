@@ -997,36 +997,29 @@ function runSafetyPageAudit() {
         });
         
         currentLocalAuditResults = matchedConflicts;
+        renderPageAuditResults(matchedConflicts);
         
-        // If Gemini API key is available, run the AI check automatically!
-        if (state.geminiApiKey && state.geminiApiKey.trim() !== "") {
-            runPageAISafetyCheck();
+        const allKnownIngredients = new Set();
+        rules.forEach(rule => rule.ingredients.forEach(ing => allKnownIngredients.add(ing.toLowerCase())));
+        
+        const uncoveredSupplements = state.supplements.filter(s => {
+            const nameLower = s.name.toLowerCase();
+            return !Array.from(allKnownIngredients).some(ing => nameLower.includes(ing));
+        });
+        
+        if (uncoveredSupplements.length > 0) {
+            const consentBox = document.getElementById('page-ai-consent-box');
+            const consentMessage = document.getElementById('page-ai-consent-message');
+            const listNames = uncoveredSupplements.map(s => `"${s.name}"`).join(', ');
+            
+            consentMessage.innerHTML = `Our local database does not contain pre-defined safety rules for: <strong>${listNames}</strong>. Run a deep AI compatibility check using the Gemini API.`;
+            consentBox.style.display = 'block';
         } else {
-            // Otherwise, render local results and show the consent card as a reminder
-            renderPageAuditResults(matchedConflicts);
-            
-            const allKnownIngredients = new Set();
-            rules.forEach(rule => rule.ingredients.forEach(ing => allKnownIngredients.add(ing.toLowerCase())));
-            
-            const uncoveredSupplements = state.supplements.filter(s => {
-                const nameLower = s.name.toLowerCase();
-                return !Array.from(allKnownIngredients).some(ing => nameLower.includes(ing));
-            });
-            
-            if (uncoveredSupplements.length > 0) {
-                const consentBox = document.getElementById('page-ai-consent-box');
-                const consentMessage = document.getElementById('page-ai-consent-message');
-                const listNames = uncoveredSupplements.map(s => `"${s.name}"`).join(', ');
-                
-                consentMessage.innerHTML = `Our local database does not contain pre-defined safety rules for: <strong>${listNames}</strong>. Enter a Gemini API Key in Settings to unlock deep AI interaction and absorption analysis.`;
-                consentBox.style.display = 'block';
-            } else {
-                document.getElementById('page-ai-consent-box').style.display = 'none';
-                // Audit is fully up to date with local db
-                state.lastAuditFingerprint = getCurrentInventoryFingerprint();
-                saveState();
-                renderSafetyPage();
-            }
+            document.getElementById('page-ai-consent-box').style.display = 'none';
+            // Audit is fully up to date with local db
+            state.lastAuditFingerprint = getCurrentInventoryFingerprint();
+            saveState();
+            renderSafetyPage();
         }
     })
     .catch(err => {

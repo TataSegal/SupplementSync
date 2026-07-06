@@ -249,9 +249,12 @@
                                     Verify supplement compatibility, synergistic absorption rules, and inventory reserves.
                                 </p>
                             </div>
-                            <div class="safety-action-buttons">
-                                <button class="btn btn-primary" onclick="runSafetyPageAudit()" style="padding: 10px 20px; font-weight: 600;">
-                                    <i class="fa-solid fa-stethoscope"></i> Run Safety Check
+                            <div class="safety-action-buttons" style="display: flex; gap: 10px;">
+                                <button class="btn btn-outline" onclick="runSafetyPageAudit()" style="padding: 10px 18px; font-weight: 600;">
+                                    <i class="fa-solid fa-stethoscope"></i> Run Surface Check
+                                </button>
+                                <button class="btn btn-primary" onclick="runPageAISafetyCheck()" style="padding: 10px 18px; font-weight: 600;">
+                                    <i class="fa-solid fa-brain"></i> Run Gemini AI Check
                                 </button>
                             </div>
                         </div>
