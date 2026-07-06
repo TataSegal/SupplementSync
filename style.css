@@ -3,33 +3,37 @@
    ========================================== */
 
 :root {
-    /* Color Palette */
-    --bg-main: #0a0c10;
-    --bg-card: #121620;
-    --bg-sidebar: #0d1017;
-    --border-color: rgba(255, 255, 255, 0.06);
-    --border-hover: rgba(255, 255, 255, 0.12);
+    /* Color Palette - Clean Premium Light Theme */
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-sidebar: #f1f5f9;
+    --border-color: #e2e8f0;
+    --border-hover: #cbd5e1;
     
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
     --text-muted: #64748b;
     
-    /* Accents */
-    --accent-teal: #0dffd6;
-    --accent-teal-dark: #008f75;
-    --accent-teal-glow: rgba(13, 255, 214, 0.15);
+    /* Accents - High Contrast for Light Theme */
+    --accent-teal: #0d9488;
+    --accent-teal-dark: #0f766e;
+    --accent-teal-glow: rgba(13, 148, 136, 0.08);
     
     --accent-green: #10b981;
-    --accent-green-glow: rgba(16, 185, 129, 0.15);
+    --accent-green-glow: rgba(16, 185, 129, 0.08);
     
-    --accent-blue: #3b82f6;
-    --accent-blue-glow: rgba(59, 130, 246, 0.15);
+    --accent-blue: #2563eb;
+    --accent-blue-glow: rgba(37, 99, 235, 0.08);
     
-    --accent-orange: #f59e0b;
-    --accent-orange-glow: rgba(245, 158, 11, 0.15);
+    --accent-orange: #ea580c;
+    --accent-orange-glow: rgba(234, 88, 12, 0.08);
     
-    --accent-red: #ef4444;
-    --accent-red-glow: rgba(239, 68, 68, 0.15);
+    --accent-red: #dc2626;
+    --accent-red-glow: rgba(220, 38, 38, 0.08);
+
+    /* Shadows */
+    --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    --card-shadow-hover: 0 15px 40px rgba(15, 23, 42, 0.1);
 
     /* Fonts & Radii */
     --font-primary: 'Outfit', sans-serif;
@@ -94,7 +98,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--bg-main);
+    color: #ffffff;
     font-size: 1.3rem;
     box-shadow: 0 0 20px var(--accent-teal-glow);
     animation: rotateLogo 8s linear infinite;
@@ -250,13 +254,13 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1.8rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--card-shadow);
     transition: var(--transition-smooth);
 }
 
 .card:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--card-shadow-hover);
 }
 
 /* Tab Switching Control */
@@ -403,7 +407,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     padding: 16px 20px;
     border-radius: var(--radius-md);
@@ -411,8 +415,8 @@ body {
 }
 
 .checklist-item:hover {
-    border-color: rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-hover);
+    background-color: var(--bg-main);
 }
 
 .checklist-left {
@@ -443,7 +447,7 @@ body {
     left: 0;
     height: 24px;
     width: 24px;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-main);
     border: 2px solid var(--text-muted);
     border-radius: 50%;
     transition: var(--transition-smooth);
@@ -501,7 +505,7 @@ body {
 /* Checklist Item States when Checked */
 .checklist-item.checked {
     opacity: 0.6;
-    background-color: rgba(255, 255, 255, 0.01);
+    background-color: var(--bg-card);
 }
 
 .checklist-item.checked .item-name {
@@ -561,7 +565,7 @@ body {
     background: none;
     border: none;
     outline: none;
-    color: #ffffff;
+    color: var(--text-primary);
     font-family: var(--font-primary);
     font-size: 0.95rem;
     width: 100%;
@@ -610,8 +614,8 @@ body {
 .pill-icon-box {
     width: 45px;
     height: 45px;
-    background-color: rgba(13, 255, 214, 0.05);
-    border: 1px solid rgba(13, 255, 214, 0.15);
+    background-color: var(--accent-teal-glow);
+    border: 1px solid rgba(13, 148, 136, 0.2);
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
@@ -672,7 +676,7 @@ body {
 
 .stock-status-bar {
     height: 6px;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(0, 0, 0, 0.05);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -719,7 +723,7 @@ body {
 .btn-icon-only:hover {
     color: var(--text-primary);
     border-color: var(--text-secondary);
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 .btn-icon-only.delete:hover {
@@ -901,14 +905,14 @@ body {
 
 .btn-primary {
     background: linear-gradient(135deg, var(--accent-teal-dark), var(--accent-teal));
-    color: var(--bg-main);
+    color: #ffffff;
     border: none;
-    box-shadow: 0 4px 15px rgba(13, 255, 214, 0.15);
+    box-shadow: 0 4px 15px rgba(13, 148, 136, 0.15);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(13, 255, 214, 0.3);
+    box-shadow: 0 6px 20px rgba(13, 148, 136, 0.25);
 }
 
 .btn-outline {
@@ -918,7 +922,7 @@ body {
 }
 
 .btn-outline:hover {
-    background-color: rgba(255, 255, 255, 0.04);
+    background-color: rgba(0, 0, 0, 0.04);
     border-color: var(--text-secondary);
 }
 
@@ -943,7 +947,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(6, 8, 12, 0.85);
+    background-color: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(8px);
     z-index: 100;
     display: flex;
@@ -966,7 +970,7 @@ body {
     width: 500px;
     max-width: 90%;
     padding: 2rem;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
     transform: translateY(20px);
     transition: var(--transition-smooth);
 }
@@ -1018,11 +1022,11 @@ body {
 
 .form-group input, 
 .form-group select {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--bg-main);
     border: 1px solid var(--border-color);
     padding: 12px;
     border-radius: var(--radius-md);
-    color: #ffffff;
+    color: var(--text-primary);
     font-family: var(--font-primary);
     font-size: 0.95rem;
     outline: none;
@@ -1032,13 +1036,13 @@ body {
 .form-group input:focus, 
 .form-group select:focus {
     border-color: var(--accent-teal);
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-card);
     box-shadow: 0 0 8px var(--accent-teal-glow);
 }
 
 .form-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
 }
 
@@ -1065,7 +1069,7 @@ body {
 .day-checkbox span {
     display: block;
     padding: 8px 0;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--bg-main);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     font-size: 0.8rem;

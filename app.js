@@ -190,6 +190,16 @@ function switchTab(tabId) {
     }
 }
 
+function getSupplementIcon(type) {
+    switch (type) {
+        case 'capsules': return '<i class="fa-solid fa-capsules"></i>';
+        case 'droplet': return '<i class="fa-solid fa-droplet"></i>';
+        case 'spoon': return '<i class="fa-solid fa-spoon"></i>';
+        case 'syringe': return '<i class="fa-solid fa-syringe"></i>';
+        default: return '<i class="fa-solid fa-pills"></i>';
+    }
+}
+
 // ==========================================
 // TAB 1: TODAY'S CHECKLIST & TRACKER
 // ==========================================
@@ -246,7 +256,7 @@ function renderTodayChecklist() {
                         </div>
                     </label>
                     <div class="item-text-info">
-                        <span class="item-name">${supp.name}</span>
+                        <span class="item-name">${getSupplementIcon(supp.type)} &nbsp;${supp.name}</span>
                         <div class="item-dosage-notes">
                             <span class="dosage-badge">${supp.dosage}</span>
                             ${supp.notes ? `<span class="notes-text">• ${supp.notes}</span>` : ''}
@@ -386,7 +396,7 @@ function renderInventory(filterQuery = "") {
             <div class="inventory-card">
                 <div class="card-top">
                     <div class="pill-icon-box">
-                        <i class="fa-solid fa-pills"></i>
+                        ${getSupplementIcon(supp.type)}
                     </div>
                     <div class="supp-meta">
                         <span class="time-badge ${supp.time}">${supp.time}</span>
@@ -437,6 +447,7 @@ function openAddModal() {
     document.getElementById('modal-title').textContent = "Add Supplement";
     document.getElementById('supplement-form').reset();
     document.getElementById('edit-id').value = "";
+    document.getElementById('supp-type').value = "pills";
     
     // Check all days by default
     const dayCheckboxes = document.querySelectorAll('input[name="days"]');
@@ -454,6 +465,7 @@ function openEditModal(id) {
     document.getElementById('supp-name').value = supp.name;
     document.getElementById('supp-dosage').value = supp.dosage;
     document.getElementById('supp-time').value = supp.time;
+    document.getElementById('supp-type').value = supp.type || "pills";
     document.getElementById('supp-stock').value = supp.stock;
     document.getElementById('supp-limit').value = supp.limit;
     document.getElementById('supp-notes').value = supp.notes || "";
@@ -478,6 +490,7 @@ function saveSupplement(e) {
     const name = document.getElementById('supp-name').value.trim();
     const dosage = document.getElementById('supp-dosage').value.trim();
     const time = document.getElementById('supp-time').value;
+    const type = document.getElementById('supp-type').value;
     const stock = parseInt(document.getElementById('supp-stock').value) || 0;
     const limit = parseInt(document.getElementById('supp-limit').value) || 0;
     const notes = document.getElementById('supp-notes').value.trim();
@@ -495,14 +508,14 @@ function saveSupplement(e) {
         // Edit Mode
         const index = state.supplements.findIndex(s => s.id === id);
         if (index > -1) {
-            state.supplements[index] = { id, name, dosage, time, days, stock, limit, notes };
+            state.supplements[index] = { id, name, dosage, time, days, stock, limit, notes, type };
             showToast(`Updated "${name}".`, "success");
         }
     } else {
         // Add Mode
         const newSupp = {
             id: Date.now().toString(),
-            name, dosage, time, days, stock, limit, notes
+            name, dosage, time, days, stock, limit, notes, type
         };
         state.supplements.push(newSupp);
         showToast(`Added "${name}" to your supplements.`, "success");

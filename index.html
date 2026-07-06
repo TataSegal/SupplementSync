@@ -12,7 +12,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main Style Sheet -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
     <div class="app-container">
@@ -305,6 +305,16 @@
                             <option value="evening">Evening</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="supp-type">Icon / Type</label>
+                        <select id="supp-type" required>
+                            <option value="pills">Pills (Default)</option>
+                            <option value="capsules">Capsules</option>
+                            <option value="droplet">Liquid / Droplet</option>
+                            <option value="spoon">Powder / Spoon</option>
+                            <option value="syringe">Injection</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -437,6 +447,6 @@
     </div>
 
     <!-- JavaScript Bundle -->
-    <script src="app.js"></script>
+    <script src="app.js?v=4"></script>
 </body>
 </html>
