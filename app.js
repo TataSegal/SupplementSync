@@ -944,7 +944,7 @@ If a detail cannot be found, return an empty string for that field. Do not inclu
     .then(data => {
         const textResponse = data.candidates[0].content.parts[0].text;
         try {
-            const parsed = JSON.parse(textResponse.trim());
+            const parsed = cleanAndParseJSON(textResponse);
             autofillForm(parsed.name || "", parsed.dosage || "", parsed.notes || "");
             showToast("AI Scan successful! Supplement details imported.", "success");
         } catch (parseErr) {
