@@ -211,6 +211,53 @@ body {
     font-weight: 700;
 }
 
+.welcome-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.header-progress-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--accent-teal-glow);
+    color: var(--accent-teal);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid rgba(13, 148, 136, 0.15);
+    margin-top: 2px;
+}
+
+.progress-badge-separator {
+    opacity: 0.5;
+}
+
+.header-progress-bar-container {
+    width: 100%;
+    max-width: 400px;
+    height: 6px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+body.dark-theme .header-progress-bar-container {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.header-progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, var(--accent-teal), var(--accent-blue));
+    border-radius: 10px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .quick-stats-row {
     display: flex;
     gap: 16px;
@@ -262,6 +309,9 @@ body {
 .tab-content {
     display: none;
     animation: fadeIn 0.4s ease;
+    max-width: 850px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .tab-content.active {

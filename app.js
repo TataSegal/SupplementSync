@@ -297,18 +297,29 @@ function updateProgressRing(taken, total) {
     const percentText = document.getElementById('progress-percent');
     const centerText = document.getElementById('progress-center-text');
     const circle = document.getElementById('progress-ring-circle');
-    
-    ratioText.textContent = `${taken} / ${total}`;
+    const progressBar = document.getElementById('header-progress-bar-fill');
     
     const percentage = total > 0 ? Math.round((taken / total) * 100) : 0;
-    percentText.textContent = `${percentage}%`;
-    centerText.textContent = `${percentage}%`;
+    
+    if (ratioText) {
+        ratioText.textContent = `${taken} / ${total}`;
+    }
+    if (percentText) {
+        percentText.textContent = `${percentage}%`;
+    }
+    if (progressBar) {
+        progressBar.style.width = `${percentage}%`;
+    }
+    if (centerText) {
+        centerText.textContent = `${percentage}%`;
+    }
     
     // SVG DashOffset math
-    // Circumference = 2 * PI * r = 2 * 3.1415 * 50 = 314.15
-    const circumference = 314.15;
-    const offset = circumference - (percentage / 100) * circumference;
-    circle.style.strokeDashoffset = offset;
+    if (circle) {
+        const circumference = 314.15;
+        const offset = circumference - (percentage / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+    }
 }
 
 function toggleSupplement(id) {
